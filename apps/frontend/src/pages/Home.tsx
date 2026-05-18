@@ -13,10 +13,8 @@ import {
   Hand,
   HelpCircle,
   LayoutDashboard,
-  Lightbulb,
   LogOut,
   Menu,
-  RotateCw,
   Rocket,
   Settings,
   Sparkles,
@@ -24,559 +22,31 @@ import {
   User,
   Users,
   X,
-  Zap,
   type LucideIcon,
 } from 'lucide-react';
+import {
+  clampPercent,
+  courseCompetencies,
+  courses,
+  currentUser,
+  defaultDiagnostic,
+  demoProgress,
+  legacyStorageKeys,
+  recommendedTrailLimit,
+  scoreCourseRecommendation,
+  storageKeys,
+  type AttemptsState,
+  type Course,
+  type DashboardStats,
+  type DiagnosticAnswers,
+  type ProgressState,
+} from '@/lib/learning';
 
 type Page = 'dashboard' | 'diagnostic' | 'trail' | 'courses' | 'lesson' | 'progress' | 'manager' | 'certificates' | 'profile' | 'settings' | 'help';
 
-interface LessonModule {
-  id: number;
-  title: string;
-  time: number;
-  paragraphs: string[];
-  highlights: string[];
-  question: string;
-  options: string[];
-  correct: number;
-  explanation: string;
-}
-
-interface Course {
-  id: number;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  level: string;
-  modules: LessonModule[];
-}
-
-type ProgressState = Record<number, number[]>;
-type AttemptsState = Record<string, number>;
-
-interface DiagnosticAnswers {
-  pain: string;
-  time: string;
-  area: string;
-  format: string;
-}
-
-interface DashboardStats {
-  overall: number;
-  completedModules: number;
-  totalMinutes: number;
-  studyHours: number;
-  activeCourses: number;
-  completedCourses: number;
-  developedCompetencies: number;
-  estimatedHoursSaved: number;
-}
-
-const storageKeys = {
-  progress: 'capacitagov-progress',
-  attempts: 'capacitagov-attempts',
-  theme: 'capacitagov-compact-mode',
-  diagnostic: 'capacitagov-diagnostic',
-};
-
-const recommendedTrailLimit = 4;
-
-const courses: Course[] = [
-  {
-    id: 1,
-    title: 'Inovação no Setor Público',
-    description: 'Aprenda princípios de inovação aplicados ao contexto governamental.',
-    icon: Rocket,
-    level: 'Básico',
-    modules: [
-      {
-        id: 1,
-        title: 'Conceitos Fundamentais',
-        time: 15,
-        paragraphs: [
-          'Inovar no setor público é implementar ideias novas ou melhoradas que geram valor real para servidores, gestores e cidadãos.',
-          'A inovação pode aparecer em tecnologia, processos, atendimento, gestão de pessoas e novas formas de colaboração.',
-        ],
-        highlights: ['Valor público antes de novidade', 'Experimentação com responsabilidade', 'Melhoria mensurável dos serviços'],
-        question: 'Qual é a definição mais adequada de inovação pública?',
-        options: ['Usar qualquer tecnologia nova', 'Implementar ideias que geram valor público real', 'Trocar todos os sistemas atuais', 'Copiar práticas privadas sem adaptação'],
-        correct: 1,
-        explanation: 'Inovação pública precisa gerar valor e impacto. Tecnologia pode ajudar, mas não é o objetivo por si só.',
-      },
-      {
-        id: 2,
-        title: 'Barreiras à Inovação',
-        time: 12,
-        paragraphs: [
-          'As maiores barreiras costumam ser culturais e institucionais: medo de errar, excesso de burocracia e pouca integração entre equipes.',
-          'Superar essas barreiras exige patrocínio, comunicação clara, pequenos testes e aprendizado contínuo.',
-        ],
-        highlights: ['Resistência à mudança', 'Processos pouco flexíveis', 'Baixa segurança para testar'],
-        question: 'Qual barreira costuma travar a inovação com mais frequência?',
-        options: ['Cultura burocrática e resistência à mudança', 'Falta total de computadores', 'Excesso de cidadãos interessados', 'Cursos muito curtos'],
-        correct: 0,
-        explanation: 'Recursos importam, mas cultura e resistência à mudança costumam bloquear até soluções simples.',
-      },
-      {
-        id: 3,
-        title: 'Medindo Impacto',
-        time: 18,
-        paragraphs: [
-          'Uma boa iniciativa precisa mostrar resultados por meio de indicadores de eficiência, qualidade e satisfação do usuário.',
-          'Medir impacto ajuda a decidir se a solução deve ser ampliada, ajustada ou encerrada.',
-        ],
-        highlights: ['Tempo economizado', 'Satisfação do usuário', 'Redução de custo ou retrabalho'],
-        question: 'Como medir o impacto de uma inovação?',
-        options: ['Apenas por opinião informal', 'Não é possível medir inovação', 'Com métricas de eficiência, qualidade e impacto', 'Somente pela quantidade de reuniões'],
-        correct: 2,
-        explanation: 'Indicadores objetivos e feedback dos usuários dão base para avaliar o impacto real.',
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: 'Design Thinking',
-    description: 'Use empatia, definição de problemas e prototipação para resolver desafios complexos.',
-    icon: Lightbulb,
-    level: 'Intermediário',
-    modules: [
-      {
-        id: 1,
-        title: 'Empatia com o Usuário',
-        time: 14,
-        paragraphs: [
-          'Design Thinking começa pela compreensão profunda das pessoas afetadas por um serviço ou problema.',
-          'Entrevistas, observação e análise de jornada ajudam a revelar necessidades que não aparecem em relatórios frios.',
-        ],
-        highlights: ['Ouvir usuários reais', 'Observar rotinas', 'Mapear dores e expectativas'],
-        question: 'Qual é o ponto de partida do Design Thinking?',
-        options: ['Comprar uma ferramenta', 'Empatia com as pessoas usuárias', 'Escrever uma norma extensa', 'Definir a solução antes do problema'],
-        correct: 1,
-        explanation: 'A etapa de empatia reduz achismos e coloca o usuário no centro da solução.',
-      },
-      {
-        id: 2,
-        title: 'Ideação e Priorização',
-        time: 16,
-        paragraphs: [
-          'Depois de entender o problema, a equipe gera alternativas e prioriza ideias viáveis, desejáveis e capazes de gerar impacto.',
-          'A diversidade de perfis melhora a qualidade das ideias e reduz pontos cegos.',
-        ],
-        highlights: ['Divergir antes de convergir', 'Priorizar impacto e viabilidade', 'Combinar ideias complementares'],
-        question: 'O que deve orientar a priorização das ideias?',
-        options: ['A ideia da pessoa mais antiga', 'Impacto, viabilidade e valor para o usuário', 'A opção mais cara', 'A primeira ideia citada'],
-        correct: 1,
-        explanation: 'Boas ideias precisam ser úteis para o usuário e possíveis de implementar no contexto real.',
-      },
-      {
-        id: 3,
-        title: 'Prototipação',
-        time: 13,
-        paragraphs: [
-          'Protótipos são versões simples da solução usadas para aprender rápido antes de investir pesado.',
-          'Eles podem ser fluxos desenhados, telas clicáveis, scripts de atendimento ou simulações de processo.',
-        ],
-        highlights: ['Testar cedo', 'Aprender com baixo custo', 'Ajustar antes de escalar'],
-        question: 'Por que criar protótipos?',
-        options: ['Para aprender rápido com baixo custo', 'Para substituir a implementação final', 'Para evitar conversar com usuários', 'Para encerrar o projeto'],
-        correct: 0,
-        explanation: 'Protótipos antecipam aprendizados e reduzem risco antes da implementação completa.',
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: 'Agilidade no Governo',
-    description: 'Implemente práticas ágeis para melhorar entregas e colaboração entre equipes.',
-    icon: Zap,
-    level: 'Intermediário',
-    modules: [
-      {
-        id: 1,
-        title: 'Princípios Ágeis',
-        time: 12,
-        paragraphs: [
-          'Agilidade é uma forma de trabalhar com ciclos curtos, transparência e adaptação contínua.',
-          'No governo, ela ajuda equipes a entregar valor em etapas sem perder governança.',
-        ],
-        highlights: ['Ciclos curtos', 'Feedback constante', 'Transparência do trabalho'],
-        question: 'O que caracteriza uma abordagem ágil?',
-        options: ['Planejamento imutável por anos', 'Ciclos curtos com feedback contínuo', 'Mais documentos e menos entrega', 'Trabalho sem prioridades'],
-        correct: 1,
-        explanation: 'Agilidade combina planejamento suficiente com aprendizado e adaptação ao longo do caminho.',
-      },
-      {
-        id: 2,
-        title: 'Kanban para Serviços',
-        time: 15,
-        paragraphs: [
-          'Kanban torna o fluxo de trabalho visível e ajuda a controlar gargalos.',
-          'Quadros com etapas claras permitem acompanhar demandas, responsáveis e prazos de forma simples.',
-        ],
-        highlights: ['Visualizar o fluxo', 'Limitar trabalho em andamento', 'Melhorar continuamente'],
-        question: 'Qual benefício direto do Kanban?',
-        options: ['Esconder gargalos', 'Visualizar o fluxo de trabalho', 'Eliminar qualquer reunião', 'Garantir orçamento infinito'],
-        correct: 1,
-        explanation: 'Ao visualizar o fluxo, a equipe identifica gargalos e melhora a gestão das demandas.',
-      },
-      {
-        id: 3,
-        title: 'Retrospectivas',
-        time: 10,
-        paragraphs: [
-          'Retrospectivas são encontros para analisar o que funcionou, o que atrapalhou e quais melhorias serão testadas.',
-          'Elas devem terminar com ações pequenas, responsáveis definidos e acompanhamento.',
-        ],
-        highlights: ['Aprendizado em equipe', 'Ações concretas', 'Melhoria contínua'],
-        question: 'Qual é o objetivo de uma retrospectiva?',
-        options: ['Culpar pessoas', 'Aprender e definir melhorias práticas', 'Cancelar entregas', 'Substituir todos os indicadores'],
-        correct: 1,
-        explanation: 'A retrospectiva foca aprendizado coletivo e melhorias reais no processo de trabalho.',
-      },
-    ],
-  },
-  {
-    id: 4,
-    title: 'Transformação Digital',
-    description: 'Modernize processos administrativos com serviços digitais centrados no cidadão.',
-    icon: RotateCw,
-    level: 'Avançado',
-    modules: [
-      {
-        id: 1,
-        title: 'Serviços Digitais',
-        time: 18,
-        paragraphs: [
-          'Transformação digital não é digitalizar burocracia ruim. É redesenhar serviços para serem simples, acessíveis e integrados.',
-          'A jornada do cidadão deve orientar prioridades e eliminar etapas desnecessárias.',
-        ],
-        highlights: ['Simplicidade', 'Acessibilidade', 'Integração entre órgãos'],
-        question: 'O que uma transformação digital efetiva deve fazer?',
-        options: ['Apenas trocar papel por PDF', 'Redesenhar serviços com foco no cidadão', 'Criar mais senhas', 'Aumentar etapas presenciais'],
-        correct: 1,
-        explanation: 'Digitalizar sem simplificar mantém o problema. O foco deve ser a experiência e o valor do serviço.',
-      },
-      {
-        id: 2,
-        title: 'Dados para Decisão',
-        time: 16,
-        paragraphs: [
-          'Dados ajudam a priorizar melhorias, monitorar serviços e identificar desigualdades no acesso.',
-          'Qualidade, segurança e governança são essenciais para que os dados sejam confiáveis.',
-        ],
-        highlights: ['Indicadores confiáveis', 'Governança de dados', 'Privacidade e segurança'],
-        question: 'Por que dados são importantes na transformação digital?',
-        options: ['Para decidir por evidências', 'Para substituir todos os servidores', 'Para evitar transparência', 'Para complicar relatórios'],
-        correct: 0,
-        explanation: 'Dados bem governados apoiam decisões melhores e permitem acompanhar resultados.',
-      },
-      {
-        id: 3,
-        title: 'Adoção e Sustentação',
-        time: 14,
-        paragraphs: [
-          'Uma solução digital só gera valor quando as pessoas conseguem adotá-la no dia a dia.',
-          'Treinamento, suporte, comunicação e monitoramento sustentam a mudança depois do lançamento.',
-        ],
-        highlights: ['Capacitação', 'Suporte contínuo', 'Monitoramento pós-lançamento'],
-        question: 'O que sustenta uma solução digital depois do lançamento?',
-        options: ['Abandonar o acompanhamento', 'Treinamento, suporte e monitoramento', 'Remover canais de ajuda', 'Não ouvir usuários'],
-        correct: 1,
-        explanation: 'Adoção depende de suporte contínuo e ajustes baseados no uso real.',
-      },
-    ],
-  },
-  {
-    id: 5,
-    title: 'Atendimento ao Cidadão',
-    description: 'Aprimore escuta, linguagem simples e resolução de demandas em serviços públicos.',
-    icon: Users,
-    level: 'Básico',
-    modules: [
-      {
-        id: 1,
-        title: 'Escuta Ativa no Serviço Público',
-        time: 12,
-        paragraphs: [
-          'Atendimento humanizado começa por reconhecer a situação da pessoa usuária e compreender sua necessidade real antes de encaminhar a demanda.',
-          'Perguntas abertas, confirmação do entendimento e comunicação respeitosa reduzem retrabalho e aumentam confiança no serviço.',
-        ],
-        highlights: ['Escuta sem julgamento', 'Confirmação da demanda', 'Encaminhamento responsável'],
-        question: 'Qual prática fortalece a escuta ativa no atendimento?',
-        options: ['Interromper para acelerar a fila', 'Confirmar o entendimento antes de orientar', 'Responder com termos técnicos', 'Encaminhar sem registrar contexto'],
-        correct: 1,
-        explanation: 'Confirmar o entendimento evita encaminhamentos errados e demonstra respeito pela necessidade apresentada.',
-      },
-      {
-        id: 2,
-        title: 'Linguagem Simples',
-        time: 14,
-        paragraphs: [
-          'Linguagem simples torna informações públicas mais claras, diretas e acessíveis para diferentes perfis de cidadãos.',
-          'Textos, formulários e respostas devem priorizar termos conhecidos, ordem lógica e instruções objetivas.',
-        ],
-        highlights: ['Clareza nas orientações', 'Menos juridiquês', 'Acesso inclusivo'],
-        question: 'O que caracteriza uma comunicação em linguagem simples?',
-        options: ['Frases longas e formais', 'Uso de siglas sem explicação', 'Orientações claras e diretas', 'Cópia integral de normas'],
-        correct: 2,
-        explanation: 'Linguagem simples mantém rigor, mas apresenta a informação de forma compreensível e acionável.',
-      },
-      {
-        id: 3,
-        title: 'Gestão de Demandas',
-        time: 15,
-        paragraphs: [
-          'Demandas bem registradas permitem acompanhar prazos, identificar recorrências e melhorar a qualidade do serviço.',
-          'Classificação, priorização e retorno ao cidadão ajudam a equipe a atuar com transparência.',
-        ],
-        highlights: ['Registro padronizado', 'Priorização transparente', 'Retorno ao cidadão'],
-        question: 'Por que classificar demandas de atendimento?',
-        options: ['Para esconder atrasos', 'Para organizar prioridades e recorrências', 'Para impedir novos pedidos', 'Para substituir a escuta'],
-        correct: 1,
-        explanation: 'Classificar demandas ajuda a enxergar padrões, priorizar corretamente e planejar melhorias.',
-      },
-    ],
-  },
-  {
-    id: 6,
-    title: 'Gestão de Projetos Públicos',
-    description: 'Planeje entregas, riscos, partes interessadas e resultados em iniciativas governamentais.',
-    icon: BookMarked,
-    level: 'Intermediário',
-    modules: [
-      {
-        id: 1,
-        title: 'Objetivos e Escopo',
-        time: 16,
-        paragraphs: [
-          'Projetos públicos precisam declarar problema, público beneficiado, entregas e critérios de sucesso desde o início.',
-          'Um escopo bem definido reduz dispersão e facilita pactos com gestores, equipes técnicas e usuários do serviço.',
-        ],
-        highlights: ['Problema claro', 'Entregas pactuadas', 'Critérios de sucesso'],
-        question: 'O que ajuda a manter um projeto público bem direcionado?',
-        options: ['Escopo indefinido', 'Objetivos e entregas claros', 'Mudanças sem registro', 'Ausência de indicadores'],
-        correct: 1,
-        explanation: 'Objetivos e entregas claros ajudam a alinhar expectativas e acompanhar avanço real.',
-      },
-      {
-        id: 2,
-        title: 'Riscos e Governança',
-        time: 18,
-        paragraphs: [
-          'Riscos devem ser identificados cedo, avaliados por impacto e probabilidade, e acompanhados durante a execução.',
-          'Governança define papéis, decisões, canais de prestação de contas e momentos de revisão.',
-        ],
-        highlights: ['Mapa de riscos', 'Papéis definidos', 'Ritos de decisão'],
-        question: 'Como tratar riscos em projetos públicos?',
-        options: ['Ignorar até acontecerem', 'Registrar, avaliar e acompanhar respostas', 'Transferir todos para a equipe técnica', 'Evitar qualquer decisão'],
-        correct: 1,
-        explanation: 'Riscos acompanhados com método reduzem surpresas e melhoram a tomada de decisão.',
-      },
-      {
-        id: 3,
-        title: 'Monitoramento de Resultados',
-        time: 17,
-        paragraphs: [
-          'Monitorar resultados permite comparar entregas previstas, entregas realizadas e benefícios alcançados.',
-          'Indicadores simples e revisões periódicas ajudam a corrigir rota antes que o projeto perca valor.',
-        ],
-        highlights: ['Indicadores de entrega', 'Benefícios esperados', 'Revisão de rota'],
-        question: 'Qual é a função do monitoramento em projetos?',
-        options: ['Apenas gerar relatórios longos', 'Acompanhar resultados e apoiar ajustes', 'Encerrar a participação da equipe', 'Eliminar toda mudança'],
-        correct: 1,
-        explanation: 'Monitoramento mostra se o projeto está produzindo valor e onde precisa de ajuste.',
-      },
-    ],
-  },
-  {
-    id: 7,
-    title: 'Dados e Indicadores para Políticas Públicas',
-    description: 'Use evidências, painéis e indicadores para priorizar ações e acompanhar resultados.',
-    icon: BarChart3,
-    level: 'Intermediário',
-    modules: [
-      {
-        id: 1,
-        title: 'Indicadores Úteis',
-        time: 15,
-        paragraphs: [
-          'Indicadores úteis conectam uma pergunta de gestão a uma medida que pode orientar decisão.',
-          'Eles precisam ter fonte conhecida, periodicidade definida e interpretação simples para a equipe.',
-        ],
-        highlights: ['Pergunta de gestão', 'Fonte confiável', 'Periodicidade definida'],
-        question: 'O que torna um indicador útil para gestão pública?',
-        options: ['Ser difícil de explicar', 'Responder a uma pergunta de decisão', 'Não ter fonte definida', 'Mudar todo dia sem critério'],
-        correct: 1,
-        explanation: 'Um bom indicador ajuda a decidir e precisa ser compreendido por quem usa a informação.',
-      },
-      {
-        id: 2,
-        title: 'Painéis para Acompanhamento',
-        time: 16,
-        paragraphs: [
-          'Painéis devem destacar poucos indicadores essenciais, com contexto suficiente para apoiar análise rápida.',
-          'Cores, filtros e comparações precisam facilitar leitura sem esconder limitações dos dados.',
-        ],
-        highlights: ['Poucos sinais vitais', 'Contexto para leitura', 'Comparações consistentes'],
-        question: 'Qual cuidado melhora um painel de indicadores?',
-        options: ['Exibir todos os dados possíveis', 'Selecionar indicadores essenciais e comparáveis', 'Remover contexto', 'Usar cores sem significado'],
-        correct: 1,
-        explanation: 'Painéis efetivos priorizam clareza e foco nos indicadores que orientam ação.',
-      },
-      {
-        id: 3,
-        title: 'Decisão Baseada em Evidências',
-        time: 17,
-        paragraphs: [
-          'Evidências combinam dados administrativos, escuta dos usuários, avaliações e conhecimento das equipes.',
-          'Decisões melhores surgem quando dados são usados para aprender, não apenas para justificar escolhas já feitas.',
-        ],
-        highlights: ['Dados administrativos', 'Avaliação de resultados', 'Aprendizado institucional'],
-        question: 'Como evidências devem apoiar decisões?',
-        options: ['Confirmando qualquer opinião', 'Combinando dados e análise do contexto', 'Substituindo diálogo com usuários', 'Eliminando revisão'],
-        correct: 1,
-        explanation: 'Evidências ganham força quando são interpretadas junto com contexto e finalidade pública.',
-      },
-    ],
-  },
-  {
-    id: 8,
-    title: 'Ética, LGPD e Segurança da Informação',
-    description: 'Proteja dados pessoais, reduza riscos e fortaleça a confiança nos serviços públicos digitais.',
-    icon: Check,
-    level: 'Avançado',
-    modules: [
-      {
-        id: 1,
-        title: 'Proteção de Dados Pessoais',
-        time: 18,
-        paragraphs: [
-          'Dados pessoais devem ser tratados com finalidade clara, base adequada e acesso limitado ao necessário.',
-          'Boas práticas de privacidade reduzem exposição indevida e fortalecem a confiança da população.',
-        ],
-        highlights: ['Finalidade definida', 'Acesso necessário', 'Transparência no tratamento'],
-        question: 'Qual princípio orienta o uso responsável de dados pessoais?',
-        options: ['Coletar tudo por precaução', 'Usar apenas o necessário para finalidade clara', 'Compartilhar sem controle', 'Guardar sem prazo'],
-        correct: 1,
-        explanation: 'Minimizar dados e declarar finalidade são práticas centrais para proteção de dados.',
-      },
-      {
-        id: 2,
-        title: 'Segurança no Dia a Dia',
-        time: 14,
-        paragraphs: [
-          'Segurança da informação depende de hábitos cotidianos: senhas fortes, atenção a links, atualização de sistemas e cuidado com compartilhamentos.',
-          'Pequenas falhas operacionais podem comprometer serviços inteiros quando não há orientação e controle.',
-        ],
-        highlights: ['Senhas fortes', 'Cuidado com links', 'Compartilhamento responsável'],
-        question: 'Qual atitude reduz risco de segurança da informação?',
-        options: ['Reutilizar senhas simples', 'Conferir links e canais antes de informar dados', 'Enviar planilhas sensíveis sem controle', 'Ignorar atualizações'],
-        correct: 1,
-        explanation: 'Verificar canais e links reduz exposição a golpes e vazamentos.',
-      },
-      {
-        id: 3,
-        title: 'Ética no Uso de Tecnologia',
-        time: 16,
-        paragraphs: [
-          'Tecnologias públicas precisam ser avaliadas quanto a transparência, inclusão, vieses e impactos sobre direitos.',
-          'A decisão ética considera eficiência, mas também riscos, explicabilidade e possibilidade de contestação pelo cidadão.',
-        ],
-        highlights: ['Transparência', 'Inclusão digital', 'Responsabilidade pública'],
-        question: 'O que uma análise ética de tecnologia deve considerar?',
-        options: ['Apenas velocidade', 'Impactos, transparência e direitos', 'Somente custo de licença', 'Preferência pessoal da equipe'],
-        correct: 1,
-        explanation: 'Uso ético de tecnologia exige olhar para efeitos sobre pessoas, direitos e confiança pública.',
-      },
-    ],
-  },
-  {
-    id: 9,
-    title: 'Comunicação Pública e Facilitação',
-    description: 'Conduza reuniões, oficinas e comunicações internas com foco, clareza e participação.',
-    icon: Hand,
-    level: 'Básico',
-    modules: [
-      {
-        id: 1,
-        title: 'Reuniões Produtivas',
-        time: 11,
-        paragraphs: [
-          'Reuniões produtivas têm objetivo claro, pauta enxuta, papéis definidos e encaminhamentos registrados.',
-          'Quando a equipe sabe o que será decidido, a reunião deixa de ser apenas informe e passa a gerar avanço.',
-        ],
-        highlights: ['Objetivo claro', 'Pauta enxuta', 'Encaminhamentos registrados'],
-        question: 'O que aumenta a efetividade de uma reunião?',
-        options: ['Pauta indefinida', 'Objetivo e encaminhamentos claros', 'Convocar todos sempre', 'Evitar decisões'],
-        correct: 1,
-        explanation: 'Objetivo e encaminhamentos claros tornam a reunião útil e rastreável.',
-      },
-      {
-        id: 2,
-        title: 'Facilitação de Oficinas',
-        time: 15,
-        paragraphs: [
-          'Facilitar oficinas é criar condições para que pessoas contribuam, organizem ideias e cheguem a decisões práticas.',
-          'Dinâmicas simples, tempo bem distribuído e sínteses visuais ajudam a transformar debate em ação.',
-        ],
-        highlights: ['Participação equilibrada', 'Síntese visual', 'Decisão prática'],
-        question: 'Qual é o papel da facilitação em uma oficina?',
-        options: ['Impor a opinião do facilitador', 'Organizar participação e apoiar decisões', 'Evitar divergências', 'Substituir o planejamento'],
-        correct: 1,
-        explanation: 'Facilitação ajuda o grupo a pensar melhor junto e sair com próximos passos claros.',
-      },
-      {
-        id: 3,
-        title: 'Comunicação Interna',
-        time: 12,
-        paragraphs: [
-          'Comunicação interna eficiente reduz ruídos, alinha prioridades e dá visibilidade às decisões que afetam o trabalho.',
-          'Canais, frequência e responsáveis precisam ser combinados para evitar excesso de mensagens e perda de informação.',
-        ],
-        highlights: ['Canais definidos', 'Mensagens objetivas', 'Ritmo combinado'],
-        question: 'O que reduz ruído na comunicação interna?',
-        options: ['Mensagens duplicadas em todos os canais', 'Canais e responsáveis definidos', 'Decisões sem registro', 'Informações sempre urgentes'],
-        correct: 1,
-        explanation: 'Combinar canais e responsáveis torna a comunicação mais previsível e menos dispersa.',
-      },
-    ],
-  },
-];
-
-const demoProgress: ProgressState = {
-  1: [1, 2, 3],
-  2: [1, 2],
-  3: [1],
-  4: [],
-  5: [],
-  6: [],
-  7: [],
-  8: [],
-  9: [],
-};
-
-const defaultDiagnostic: DiagnosticAnswers = {
-  pain: 'Tenho pouco tempo e preciso de aulas objetivas.',
-  time: '2 horas por semana',
-  area: 'Modernização administrativa',
-  format: 'Conteúdo curto com prática guiada',
-};
-
-const courseCompetencies: Record<number, string[]> = {
-  1: ['Inovação pública', 'Mensuração de impacto', 'Melhoria de serviços'],
-  2: ['Empatia com usuários', 'Prototipação', 'Priorização de soluções'],
-  3: ['Gestão visual', 'Trabalho em ciclos curtos', 'Melhoria contínua'],
-  4: ['Serviços digitais', 'Governança de dados', 'Adoção de tecnologia'],
-  5: ['Atendimento humanizado', 'Linguagem simples', 'Gestão de demandas'],
-  6: ['Gestão de projetos', 'Governança', 'Monitoramento de resultados'],
-  7: ['Indicadores públicos', 'Análise de dados', 'Decisão por evidências'],
-  8: ['Proteção de dados', 'Segurança da informação', 'Ética digital'],
-  9: ['Comunicação pública', 'Facilitação', 'Reuniões produtivas'],
-};
-
-function readStorage<T>(key: string, fallback: T): T {
+function readStorage<T>(key: string, fallback: T, legacyKey?: string): T {
   try {
-    const value = window.localStorage.getItem(key);
+    const value = window.localStorage.getItem(key) ?? (legacyKey ? window.localStorage.getItem(legacyKey) : null);
     return value ? (JSON.parse(value) as T) : fallback;
   } catch {
     return fallback;
@@ -584,38 +54,9 @@ function readStorage<T>(key: string, fallback: T): T {
 }
 
 function readProgressStorage() {
-  const savedProgress = readStorage<ProgressState>(storageKeys.progress, demoProgress);
+  const savedProgress = readStorage<ProgressState>(storageKeys.progress, demoProgress, legacyStorageKeys.progress);
   const completedCount = Object.values(savedProgress).reduce((total, modules) => total + modules.length, 0);
   return completedCount > 0 ? savedProgress : demoProgress;
-}
-
-function clampPercent(value: number) {
-  return Math.max(0, Math.min(100, Math.round(value)));
-}
-
-function scoreCourseRecommendation(courseId: number, diagnostic: DiagnosticAnswers) {
-  const scoreGroups = [
-    diagnostic.area.includes('Digital') ? [4, 8, 7, 3, 1] : [],
-    diagnostic.area.includes('Atendimento') ? [5, 9, 2, 1, 7] : [],
-    diagnostic.area.includes('Dados') ? [7, 4, 6, 8, 1] : [],
-    diagnostic.area.includes('Projetos') ? [6, 3, 1, 7, 9] : [],
-    diagnostic.area.includes('Modernização') ? [1, 3, 6, 4, 2] : [],
-    diagnostic.pain.includes('pouco tempo') ? [9, 5, 3, 1, 8] : [],
-    diagnostic.pain.includes('teóricos') ? [2, 6, 9, 5, 3] : [],
-    diagnostic.pain.includes('ferramentas digitais') ? [4, 8, 7, 1, 3] : [],
-    diagnostic.pain.includes('dados') ? [7, 6, 4, 8, 1] : [],
-    diagnostic.pain.includes('atendimento') ? [5, 9, 2, 1, 6] : [],
-    diagnostic.time.includes('1 hora') ? [9, 5, 3, 1, 8] : [],
-    diagnostic.time.includes('4 horas') ? [6, 4, 7, 8, 2] : [],
-    diagnostic.format.includes('certificação') ? [6, 4, 8, 7, 1] : [],
-    diagnostic.format.includes('consulta rápida') ? [9, 7, 8, 5, 3] : [],
-    diagnostic.format.includes('prática guiada') ? [2, 3, 5, 6, 1] : [],
-  ];
-
-  return scoreGroups.reduce((total, group) => {
-    const index = group.indexOf(courseId);
-    return index >= 0 ? total + group.length - index : total;
-  }, 0);
 }
 
 export default function Home() {
@@ -625,12 +66,13 @@ export default function Home() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [answered, setAnswered] = useState(false);
   const [showCompletion, setShowCompletion] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [compactMode, setCompactMode] = useState(() => readStorage<boolean>(storageKeys.theme, false));
+  const [compactMode, setCompactMode] = useState(() => readStorage<boolean>(storageKeys.theme, false, legacyStorageKeys.theme));
   const [progress, setProgress] = useState<ProgressState>(() => readProgressStorage());
-  const [attempts, setAttempts] = useState<AttemptsState>(() => readStorage<AttemptsState>(storageKeys.attempts, {}));
-  const [diagnostic, setDiagnostic] = useState<DiagnosticAnswers>(() => readStorage<DiagnosticAnswers>(storageKeys.diagnostic, defaultDiagnostic));
+  const [attempts, setAttempts] = useState<AttemptsState>(() => readStorage<AttemptsState>(storageKeys.attempts, {}, legacyStorageKeys.attempts));
+  const [diagnostic, setDiagnostic] = useState<DiagnosticAnswers>(() => readStorage<DiagnosticAnswers>(storageKeys.diagnostic, defaultDiagnostic, legacyStorageKeys.diagnostic));
 
   useEffect(() => {
     window.localStorage.setItem(storageKeys.progress, JSON.stringify(progress));
@@ -647,6 +89,18 @@ export default function Home() {
   useEffect(() => {
     window.localStorage.setItem(storageKeys.diagnostic, JSON.stringify(diagnostic));
   }, [diagnostic]);
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 1024px)');
+    const syncSidebar = () => {
+      setIsDesktop(media.matches);
+      setSidebarOpen(media.matches);
+    };
+
+    syncSidebar();
+    media.addEventListener('change', syncSidebar);
+    return () => media.removeEventListener('change', syncSidebar);
+  }, []);
 
   const selectedCourse = courses.find((course) => course.id === selectedCourseId) ?? courses[0];
   const currentLesson = selectedCourse.modules[currentModule] ?? selectedCourse.modules[0];
@@ -686,6 +140,9 @@ export default function Home() {
   const navigate = (page: Page) => {
     setCurrentPage(page);
     setShowProfileMenu(false);
+    if (!isDesktop) {
+      setSidebarOpen(false);
+    }
   };
 
   const startCourse = (courseId: number) => {
@@ -749,9 +206,9 @@ export default function Home() {
     const issueDate = new Date().toLocaleDateString('pt-BR');
     const competencies = courseCompetencies[course.id] ?? [];
     const certificate = [
-      'CERTIFICADO CAPACITAGOV',
+      'CERTIFICADO INNOVAGOV',
       '',
-      'Certificamos que Ricardo Oliveira concluiu o curso:',
+      `Certificamos que ${currentUser.name} concluiu o curso:`,
       course.title,
       '',
       `Carga horária: ${course.modules.reduce((sum, module) => sum + module.time, 0)} minutos`,
@@ -761,7 +218,7 @@ export default function Home() {
       ...competencies.map((competency) => `- ${competency}`),
       '',
       `Data de emissão: ${issueDate}`,
-      `Código: CAP-${course.id}-100-${Date.now().toString().slice(-6)}`,
+      `Código: INN-${course.id}-100-${Date.now().toString().slice(-6)}`,
     ].join('\n');
 
     const blob = new Blob([certificate], { type: 'text/plain;charset=utf-8' });
@@ -797,12 +254,16 @@ export default function Home() {
     const progress = courseProgress(course);
     return progress > 0 && progress < 100;
   }).slice(0, 4);
+  const primaryCourse = continueCourses[0] ?? recommendedTrailCourses[0] ?? recommendedCourses[0];
+  const primaryProgress = courseProgress(primaryCourse);
+  const primaryCompletedModules = progress[primaryCourse.id]?.length ?? 0;
+  const primaryNextModule = primaryCourse.modules[Math.min(primaryCompletedModules, primaryCourse.modules.length - 1)];
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-white via-[#f0f5ff] to-[#e8f0ff] flex flex-col ${compactMode ? 'text-sm' : ''}`}>
       <header className="bg-white border-b border-[#e8f0ff] shadow-sm sticky top-0 z-40">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
+        <div className="flex min-h-20 items-center justify-between gap-3 px-4 py-4 sm:px-6">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
             <button
               type="button"
               onClick={() => setSidebarOpen((open) => !open)}
@@ -811,14 +272,14 @@ export default function Home() {
             >
               {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
-            <button type="button" onClick={() => navigate('dashboard')} className="text-2xl font-bold bg-gradient-to-r from-[#1351b4] to-[#0d3d7f] bg-clip-text text-transparent">
+            <button type="button" onClick={() => navigate('dashboard')} className="truncate text-xl font-bold bg-gradient-to-r from-[#1351b4] to-[#0d3d7f] bg-clip-text text-transparent sm:text-2xl">
               InnovaGov
             </button>
           </div>
           <div className="relative">
             <button type="button" onClick={() => setShowProfileMenu((open) => !open)} className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#1351b4] to-[#0d3d7f] rounded-full flex items-center justify-center text-white font-bold">RO</div>
-              <span className="text-gray-700 font-medium hidden sm:block">Ricardo Oliveira</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-[#1351b4] to-[#0d3d7f] rounded-full flex items-center justify-center text-white font-bold">{currentUser.initials}</div>
+              <span className="text-gray-700 font-medium hidden sm:block">{currentUser.name}</span>
             </button>
             {showProfileMenu && (
               <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-xl border border-[#e8f0ff] overflow-hidden z-50">
@@ -838,7 +299,15 @@ export default function Home() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className={`${sidebarOpen ? 'w-72' : 'w-0'} bg-white text-gray-900 border-r border-[#e8f0ff] shadow-lg transition-all duration-300 overflow-hidden fixed left-0 top-20 h-[calc(100vh-80px)] overflow-y-auto z-30`}>
+        {sidebarOpen && !isDesktop && (
+          <button
+            type="button"
+            className="fixed inset-x-0 bottom-0 top-20 z-20 bg-black/30 backdrop-blur-[2px] lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Fechar menu"
+          />
+        )}
+        <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed left-0 top-20 z-30 h-[calc(100vh-80px)] w-[min(18rem,86vw)] overflow-y-auto border-r border-[#e8f0ff] bg-white text-gray-900 shadow-lg transition-transform duration-300 lg:w-72`}>
           <div className="p-6">
             <nav className="space-y-2 mb-12">
               {navItems.map((item) => {
@@ -891,38 +360,80 @@ export default function Home() {
           </div>
         </aside>
 
-        <main className={`flex-1 overflow-auto transition-all duration-300 ${sidebarOpen ? 'ml-72' : 'ml-0'}`}>
+        <main className={`flex-1 overflow-auto transition-all duration-300 ${sidebarOpen && isDesktop ? 'lg:ml-72' : 'ml-0'}`}>
           {currentPage === 'dashboard' && (
-            <div className="relative p-5">
-              <div className="relative mb-12">
-                <h2 className="text-5xl font-bold text-gray-900 mb-2 flex items-center gap-3">Bem-vindo de volta! <Hand className="text-[#1351b4]" size={40} /></h2>
-                <p className="text-xl text-gray-600">Continue sua jornada de aprendizado e conhecimento.</p>
-                <div className="absolute right-0 top-0 z-20 hidden xl:block">
+            <div className="relative p-4 sm:p-5">
+              <div className="relative mb-8">
+                <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-2 flex items-center gap-3">Bem-vindo de volta! <Hand className="text-[#1351b4]" size={40} /></h2>
+                <p className="text-xl text-gray-600">Retome sua capacitação pelo ponto mais importante agora.</p>
+                <div className="absolute right-0 -top-5 z-20 hidden xl:block">
                   <MascotTip title="Comece por aqui!" compact className="max-w-xs">
-                    Eu te guio pelo diagnóstico e ajudo a recomendar as trilhas mais correspondentes com seu perfil.
+                    O primeiro card mostra o melhor próximo passo para você não precisar procurar onde parou.
                   </MascotTip>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-                {[
-                  { label: 'Progresso Geral', value: `${stats.overall}%`, icon: BarChart3, color: 'from-[#1859c9] to-[#1351b4]' },
-                  { label: 'Horas de Estudo', value: `${stats.studyHours}h`, icon: Clock, color: 'from-[#fbcc06] to-[#e6b800]' },
-                  { label: 'Cursos Ativos', value: String(stats.activeCourses), icon: Users, color: 'from-[#1351b4] to-[#1145a0]' },
-                  { label: 'Certificados', value: String(stats.completedCourses), icon: Award, color: 'from-[#fbcc06] to-[#e6b800]' },
-                ].map((stat) => {
-                  const Icon = stat.icon;
-                  return (
-                    <Card key={stat.label} className="bg-white/70 backdrop-blur-sm border border-[#e8f0ff] hover:border-[#c4d9ff] hover:shadow-xl transition-all duration-300 p-6">
-                      <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-lg flex items-center justify-center mb-4 text-white`}>
-                        <Icon size={24} />
+              <Card className="mb-8 overflow-hidden border border-[#d6e5ff] bg-white/85 shadow-sm">
+                <div className="grid gap-0 lg:grid-cols-[1.4fr_0.9fr]">
+                  <div className="p-5 sm:p-7">
+                    <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-bold uppercase text-[#1351b4]">
+                          {primaryProgress > 0 ? 'Continue de onde parou' : 'Próximo passo recomendado'}
+                        </p>
+                        <h3 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl">{primaryCourse.title}</h3>
+                        <p className="mt-2 max-w-2xl text-gray-600">{primaryCourse.description}</p>
                       </div>
-                      <p className="text-gray-600 text-sm font-medium mb-2">{stat.label}</p>
-                      <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                    </Card>
-                  );
-                })}
-              </div>
+                      <div className="rounded-lg border border-[#d6e5ff] bg-[#f8fbff] px-4 py-3 text-left sm:text-right">
+                        <p className="text-xs font-bold uppercase text-[#1351b4]">Progresso</p>
+                        <p className="text-3xl font-bold text-gray-900">{primaryProgress}%</p>
+                      </div>
+                    </div>
+
+                    <div className="mb-5 rounded-lg border border-[#d6e5ff] bg-[#f8fbff] p-4">
+                      <p className="text-sm font-bold text-[#1351b4]">Próximo módulo</p>
+                      <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-lg font-bold text-gray-900">{primaryNextModule.title}</p>
+                          <p className="mt-1 flex items-center gap-2 text-sm text-gray-600">
+                            <Clock size={16} className="text-[#1351b4]" />
+                            {primaryNextModule.time} minutos · {primaryCourse.level}
+                          </p>
+                        </div>
+                        <Button type="button" onClick={() => startCourse(primaryCourse.id)} className="bg-gradient-to-r from-[#1351b4] to-[#1145a0] text-white">
+                          {primaryProgress > 0 ? 'Continuar agora' : 'Começar agora'}
+                          <ChevronRight size={16} />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="h-3 overflow-hidden rounded-full bg-gray-200">
+                      <div className="h-full bg-gradient-to-r from-[#1859c9] to-[#fbcc06] transition-all duration-300" style={{ width: `${primaryProgress}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="border-t border-[#d6e5ff] bg-white p-5 sm:p-7 lg:border-l lg:border-t-0">
+                    <p className="text-sm font-bold uppercase text-[#1351b4]">Resumo rápido</p>
+                    <div className="mt-5 grid grid-cols-2 overflow-hidden rounded-lg border border-[#d6e5ff] bg-white">
+                      {[
+                        { label: 'Geral', value: `${stats.overall}%`, icon: BarChart3 },
+                        { label: 'Horas', value: `${stats.studyHours}h`, icon: Clock },
+                        { label: 'Ativos', value: String(stats.activeCourses), icon: Users },
+                        { label: 'Certificados', value: String(stats.completedCourses), icon: Award },
+                      ].map((stat) => {
+                        const Icon = stat.icon;
+                        return (
+                          <div key={stat.label} className="border-[#e8f0ff] p-4 odd:border-r [&:nth-child(-n+2)]:border-b">
+                            <Icon size={18} className="mb-2 text-[#1351b4]" />
+                            <p className="text-xs font-semibold text-gray-600">{stat.label}</p>
+                            <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </Card>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 <DashboardDiagnostic
@@ -964,7 +475,7 @@ export default function Home() {
                   <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
                     <div>
                       <p className="text-sm font-semibold text-[#1351b4] mb-1">TRILHA RECOMENDADA</p>
-                      <h3 className="text-2xl font-bold text-gray-900">Modernização Administrativa para Ricardo</h3>
+                      <h3 className="text-2xl font-bold text-gray-900">Modernização Administrativa para {currentUser.name}</h3>
                       <p className="text-gray-600 mt-2">Baseada no diagnóstico: {diagnostic.pain}</p>
                     </div>
                     <Button type="button" onClick={() => navigate('trail')} variant="outline">Ver trilhas</Button>
@@ -981,14 +492,14 @@ export default function Home() {
                 </Card>                
               </div>
 
-              {continueCourses.length > 0 && (
-                <CourseGrid title="Continue de Onde Parou" courses={continueCourses} progressFor={courseProgress} onStart={startCourse} />
+              {continueCourses.length > 1 && (
+                <CourseGrid title="Outros cursos em andamento" courses={continueCourses.slice(1)} progressFor={courseProgress} onStart={startCourse} />
               )}
             </div>
           )}
 
           {currentPage === 'courses' && (
-            <div className="p-8">
+            <div className="p-4 sm:p-8">
               <CourseGrid title="Todos os Cursos" courses={courses} progressFor={courseProgress} onStart={startCourse} largeTitle />
             </div>
           )}
@@ -1162,8 +673,8 @@ export default function Home() {
           )}
 
           {currentPage === 'progress' && (
-            <div className="p-8">
-              <h2 className="text-4xl font-bold text-gray-900 mb-12">Seu Progresso</h2>
+            <div className="p-4 sm:p-8">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-12">Seu Progresso</h2>
               <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-12">
                 {[
                   { label: 'Horas Totais', value: `${stats.studyHours}h`, icon: Clock },
@@ -1212,8 +723,8 @@ export default function Home() {
           )}
 
           {currentPage === 'certificates' && (
-            <div className="p-8">
-              <h2 className="text-4xl font-bold text-gray-900 mb-12">Seus Certificados</h2>
+            <div className="p-4 sm:p-8">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-12">Seus Certificados</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {completedCourseList.length === 0 && (
                   <Card className="bg-white/70 border border-[#e8f0ff] p-8 text-center md:col-span-2 lg:col-span-3">
@@ -1239,7 +750,7 @@ export default function Home() {
                             </span>
                           ))}
                         </div>
-                        <p className="text-xs text-gray-500 font-mono mb-4">CAP-{course.id}-100</p>
+                        <p className="text-xs text-gray-500 font-mono mb-4">INN-{course.id}-100</p>
                         <Button type="button" onClick={() => downloadCertificate(course)} className="w-full bg-gradient-to-r from-[#1351b4] to-[#1145a0] text-white">
                           <Download size={16} /> Baixar Certificado
                         </Button>
@@ -1262,15 +773,15 @@ export default function Home() {
             <SimplePage
               title="Meu Perfil"
               icon={User}
-              body="Perfil ativo para Ricardo Oliveira. Seus cursos, tentativas de quiz e certificados ficam salvos neste navegador."
+              body={`Perfil ativo para ${currentUser.name}. Seus cursos, tentativas de quiz e certificados ficam salvos neste navegador.`}
               actionLabel="Ver progresso"
               onAction={() => navigate('progress')}
             />
           )}
 
           {currentPage === 'settings' && (
-            <div className="p-8">
-              <h2 className="text-4xl font-bold text-gray-900 mb-8">Configurações</h2>
+            <div className="p-4 sm:p-8">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">Configurações</h2>
               <Card className="bg-white/70 border border-[#e8f0ff] p-8 max-w-2xl">
                 <div className="flex items-center justify-between gap-6 mb-6">
                   <div>
@@ -1497,14 +1008,14 @@ function DiagnosticPage({
 
   if (completed) {
     return (
-      <div className="relative p-8">
+      <div className="relative p-4 sm:p-8">
         <div className="mx-auto max-w-3xl">
           <Card className="bg-white/80 border border-[#e8f0ff] p-8 text-center shadow-sm">
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-lg bg-green-100 text-green-700">
               <Check size={34} />
             </div>
             <p className="text-sm font-bold uppercase tracking-wide text-[#1351b4]">Diagnóstico completo</p>
-            <h2 className="mt-2 text-4xl font-bold text-gray-900">Sua trilha personalizada está pronta</h2>
+            <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-gray-900">Sua trilha personalizada está pronta</h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
               Organizamos os cursos de acordo com suas respostas. Agora o servidor pode seguir direto para as trilhas recomendadas.
             </p>
@@ -1532,9 +1043,9 @@ function DiagnosticPage({
   }
 
   return (
-    <div className="relative p-8">
+    <div className="relative p-4 sm:p-8">
       <div className="mb-8">
-        <h2 className="text-4xl font-bold text-gray-900 mb-3">Diagnóstico Inicial</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Diagnóstico Inicial</h2>
         <p className="text-lg text-gray-600">Responda uma pergunta por vez para gerar uma trilha personalizada para o servidor.</p>
       </div>
 
@@ -1629,10 +1140,10 @@ function TrailPage({
   onRetake: () => void;
 }) {
   return (
-    <div className="relative p-8">
+    <div className="relative p-4 sm:p-8">
       <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-3">Minhas Trilhas</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Minhas Trilhas</h2>
           <p className="text-lg text-gray-600">Percurso sugerido para estudar no ritmo do servidor e aplicar no trabalho.</p>
         </div>       
       </div>
@@ -1694,9 +1205,9 @@ function ManagerPage({
   const averageProgress = clampPercent(courses.reduce((sum, course) => sum + progressFor(course), 0) / courses.length);
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="mb-10">
-        <h2 className="text-4xl font-bold text-gray-900 mb-3">Dashboard do Gestor</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Dashboard do Gestor</h2>
         <p className="text-lg text-gray-600">Visão institucional para acompanhar engajamento, desempenho e impacto da capacitação.</p>
       </div>
 
@@ -1776,7 +1287,7 @@ function CourseGrid({
 }) {
   return (
     <div>
-      <h3 className={`${largeTitle ? 'text-4xl mb-12' : 'text-2xl mb-8'} font-bold text-gray-900 flex items-center gap-3`}>
+      <h3 className={`${largeTitle ? 'text-3xl sm:text-4xl mb-12' : 'text-2xl mb-8'} font-bold text-gray-900 flex items-center gap-3`}>
         <span className="w-1 h-9 bg-gradient-to-b from-[#1351b4] to-[#fbcc06] rounded-full" />
         {title}
       </h3>
@@ -1831,10 +1342,10 @@ function SimplePage({
   onAction: () => void;
 }) {
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <Card className="bg-white/70 border border-[#e8f0ff] p-8 max-w-2xl">
         <Icon size={48} className="text-[#1351b4] mb-4" />
-        <h2 className="text-4xl font-bold text-gray-900 mb-4">{title}</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{title}</h2>
         <p className="text-gray-600 text-lg mb-8">{body}</p>
         <Button type="button" onClick={onAction} className="bg-gradient-to-r from-[#1351b4] to-[#1145a0] text-white">
           {actionLabel}

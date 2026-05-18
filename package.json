@@ -1,5 +1,5 @@
 {
-  "name": "capacitagov",
+  "name": "innovagov",
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
@@ -8,6 +8,7 @@
     "build": "vite build --configLoader runner && tsc apps/backend/index.ts --outDir dist --module NodeNext --moduleResolution NodeNext --target ES2022 --esModuleInterop --skipLibCheck",
     "start": "node dist/index.js",
     "preview": "vite preview --host",
+    "test": "tsx apps/frontend/src/lib/learning.test.ts",
     "check": "tsc --noEmit",
     "format": "prettier --write ."
   },
