@@ -272,7 +272,7 @@ export default function Home() {
             >
               {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
-            <button type="button" onClick={() => navigate('dashboard')} className="truncate text-xl font-bold bg-gradient-to-r from-[#008AF4] to-[#173DB7] bg-clip-text text-transparent sm:text-2xl">
+            <button type="button" onClick={() => navigate('dashboard')} className="truncate bg-gradient-to-r from-[#17C7B2] to-[#1464E9] bg-clip-text text-xl font-bold text-transparent sm:text-2xl">
               InnovaGov
             </button>
           </div>
@@ -337,7 +337,7 @@ export default function Home() {
                     <span className="font-bold text-[#008AF4]">{stats.overall}%</span>
                   </div>
                   <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] transition-all duration-300" style={{ width: `${stats.overall}%` }} />
+                    <div className="h-full bg-gradient-to-r from-[#17C7B2] to-[#1464E9] transition-all duration-300" style={{ width: `${stats.overall}%` }} />
                   </div>
                 </div>
                 <div className="text-xs text-gray-600 space-y-1">
@@ -373,7 +373,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <Card className="mb-4 overflow-hidden border border-[#FC9346] bg-white/85 py-0 shadow-sm sm:mb-8 sm:py-6">
+              <Card className="mb-4 overflow-hidden border border-[#d5dce5] bg-white/85 py-0 shadow-sm sm:mb-8 sm:py-6">
                 <div className="grid gap-0 lg:grid-cols-[1.4fr_0.9fr]">
                   <div className="p-4 sm:p-7">
                     <div className="mb-3 grid grid-cols-[1fr_auto] items-start gap-3 sm:mb-5 sm:flex sm:flex-wrap sm:justify-between sm:gap-4">
@@ -409,7 +409,7 @@ export default function Home() {
                     </div>
 
                     <div className="h-2 overflow-hidden rounded-full bg-gray-200 sm:h-3">
-                      <div className="h-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] transition-all duration-300" style={{ width: `${primaryProgress}%` }} />
+                      <div className="h-full bg-gradient-to-r from-[#17C7B2] to-[#1464E9] transition-all duration-300" style={{ width: `${primaryProgress}%` }} />
                     </div>
                   </div>
 
@@ -447,8 +447,8 @@ export default function Home() {
 
 
 
-                <Card className="bg-white/70 backdrop-blur-sm border border-[#FC9346] hover:border-[#E94E1B] hover:shadow-xl p-4 md:p-6">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#FC9346] to-[#E94E1B] rounded-lg flex items-center justify-center mb-3 md:mb-4 text-white">
+                <Card className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] hover:shadow-xl p-4 md:p-6">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#008AF4] to-[#173DB7] rounded-lg flex items-center justify-center mb-3 md:mb-4 text-white">
                     <Rocket size={22} className="md:h-6 md:w-6" />
                   </div>
                   <p className="mb-2 text-xs font-medium text-gray-600 md:text-sm">Trilha Recomendada</p>
@@ -461,7 +461,7 @@ export default function Home() {
                   </div>
                 </Card>
 
-                <Card className="bg-white/70 backdrop-blur-sm border border-[#FC9346] hover:border-[#E94E1B] hover:shadow-xl p-4 md:p-6">
+                <Card className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] hover:shadow-xl p-4 md:p-6">
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#008AF4] to-[#173DB7] rounded-lg flex items-center justify-center mb-3 md:mb-4 text-white">
                     <BarChart3 size={22} className="md:h-6 md:w-6" />
                   </div>
@@ -478,7 +478,7 @@ export default function Home() {
               </div>
 
               <div className="hidden">
-                <Card className="lg:col-span-3 bg-white/75 border border-[#d9efff] p-6">
+                <Card className="lg:col-span-3 bg-white/75 border border-[#d5dce5] p-6">
                   <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
                     <div>
                       <p className="text-sm font-semibold text-[#008AF4] mb-1">TRILHA RECOMENDADA</p>
@@ -537,7 +537,7 @@ export default function Home() {
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 <div className="lg:col-span-2">
-                  <Card className="relative overflow-visible bg-white/85 backdrop-blur-sm border border-[#FC9346] p-5 mb-5">
+                  <Card className="relative overflow-visible bg-white/85 backdrop-blur-sm border border-[#d5dce5] p-5 mb-5">
                     <h2 className="text-2xl font-bold text-gray-900 mb-3">Módulo {currentModule + 1}: {currentLesson.title}</h2>
                     <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4 pb-4 border-b border-[#bfe3ff]">
                       <span className="flex items-center gap-2"><Clock className="text-[#008AF4]" size={16} /> {currentLesson.time} minutos</span>
@@ -640,7 +640,7 @@ export default function Home() {
                 </div>
 
                 <div className="lg:col-span-1">
-                  <Card className="bg-white/85 backdrop-blur-sm border border-[#FC9346] p-5 sticky top-24">
+                  <Card className="bg-white/85 backdrop-blur-sm border border-[#d5dce5] p-5 sticky top-24">
                     <MascotTip title="Dica da Nina" compact className="mb-4 max-w-none">
                       Leia os destaques e responda com calma. Se errar, eu mostro o caminho para tentar de novo.
                     </MascotTip>
@@ -692,7 +692,7 @@ export default function Home() {
                 ].map((stat) => {
                   const Icon = stat.icon;
                   return (
-                    <Card key={stat.label} className="bg-white/70 backdrop-blur-sm border border-[#FC9346] p-4 md:p-6">
+                    <Card key={stat.label} className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] p-4 md:p-6">
                       <div className="flex min-h-20 flex-col items-start justify-between gap-3 md:min-h-0 md:flex-row md:items-center md:gap-4">
                         <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#173DB7] to-[#008AF4] rounded-lg flex items-center justify-center text-white"><Icon size={22} className="md:h-6 md:w-6" /></div>
                         <div>
@@ -705,7 +705,7 @@ export default function Home() {
                 })}
               </div>
 
-              <Card className="bg-white/70 backdrop-blur-sm border border-[#FC9346] p-4 md:p-8">
+              <Card className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] p-4 md:p-8">
                 <h3 className="mb-4 text-xl font-bold text-gray-900 md:mb-6 md:text-2xl">Detalhamento por Curso</h3>
                 <div className="grid grid-cols-2 gap-3 md:block md:space-y-6">
                   {courses.map((course) => (
@@ -720,7 +720,7 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200 md:h-3">
-                        <div className="h-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] transition-all" style={{ width: `${courseProgress(course)}%` }} />
+                        <div className="h-full bg-gradient-to-r from-[#17C7B2] to-[#1464E9] transition-all" style={{ width: `${courseProgress(course)}%` }} />
                       </div>
                     </div>
                   ))}
@@ -734,7 +734,7 @@ export default function Home() {
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8 md:mb-12">Seus Certificados</h2>
               <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                 {completedCourseList.length === 0 && (
-                  <Card className="col-span-2 bg-white/70 border border-[#FC9346] p-6 md:p-8 text-center lg:col-span-3">
+                  <Card className="col-span-2 bg-white/70 border border-[#d5dce5] p-6 md:p-8 text-center lg:col-span-3">
                     <Trophy size={56} className="text-[#FC9346] mx-auto mb-4" />
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">Nenhum certificado liberado ainda</h3>
                     <p className="text-gray-600 mb-6">Conclua todos os módulos de um curso para baixar seu certificado.</p>
@@ -742,7 +742,7 @@ export default function Home() {
                   </Card>
                 )}
                 {completedCourseList.map((course) => (
-                    <Card key={course.id} className="bg-white/70 backdrop-blur-sm border-2 border-[#FC9346] overflow-hidden">
+                    <Card key={course.id} className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] overflow-hidden">
                       <div className="bg-[#FC9346] p-4 text-center md:p-8">
                         <Trophy className="mx-auto mb-2 h-10 w-10 text-[#173DB7] md:mb-3 md:h-[60px] md:w-[60px]" />
                         <h4 className="line-clamp-2 text-sm font-bold leading-tight text-[#173DB7] md:line-clamp-none md:text-lg">{course.title}</h4>
@@ -789,7 +789,7 @@ export default function Home() {
           {currentPage === 'settings' && (
             <div className="p-4 sm:p-8">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">Configurações</h2>
-              <Card className="bg-white/70 border border-[#FC9346] p-8 max-w-2xl">
+              <Card className="bg-white/70 border border-[#d5dce5] p-8 max-w-2xl">
                 <div className="flex items-center justify-between gap-6 mb-6">
                   <div>
                     <h3 className="font-bold text-gray-900 mb-1">Modo compacto</h3>
@@ -823,7 +823,7 @@ export default function Home() {
 
       {showCompletion && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <Card className="bg-white max-w-md w-full p-8 text-center animate-in zoom-in-50 duration-300">
+          <Card className="bg-white max-w-md w-full border border-[#d5dce5] p-8 text-center animate-in zoom-in-50 duration-300">
             <div className="mb-6 flex justify-center">
               <MascotAvatar size="lg" />
             </div>
@@ -921,7 +921,7 @@ function MascotTip({
 
 function DashboardDiagnostic({ onStart }: { onStart: () => void }) {
   return (
-    <Card className="bg-white/70 backdrop-blur-sm border border-[#FC9346] hover:border-[#E94E1B] hover:shadow-xl p-4 md:p-6">
+    <Card className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] hover:shadow-xl p-4 md:p-6">
       <div className="flex h-full flex-col justify-between gap-3 md:gap-4">
         <div>
           <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#008AF4] to-[#173DB7] rounded-lg flex items-center justify-center mb-3 md:mb-4 text-white">
@@ -934,7 +934,7 @@ function DashboardDiagnostic({ onStart }: { onStart: () => void }) {
           </p>
         </div>
         <div className="hidden">
-          <div className="rounded-lg border border-[#FC9346] bg-[#f3fbff] p-4">
+          <div className="rounded-lg border border-[#bfe3ff] bg-[#f3fbff] p-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#008AF4] text-white">
                 <Check size={20} />
@@ -1017,7 +1017,7 @@ function DiagnosticPage({
     return (
       <div className="relative p-4 sm:p-8">
         <div className="mx-auto max-w-3xl">
-      <Card className="bg-white/80 border border-[#FC9346] p-5 text-center shadow-sm sm:p-8">
+      <Card className="bg-white/80 border border-[#d5dce5] p-5 text-center shadow-sm sm:p-8">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#eef8ff] text-[#008AF4] sm:mb-5 sm:h-16 sm:w-16">
               <Check size={28} className="sm:h-[34px] sm:w-[34px]" />
             </div>
@@ -1062,14 +1062,14 @@ function DiagnosticPage({
         </MascotTip>
       </div>
 
-      <Card className="mx-auto max-w-3xl bg-white/75 border border-[#FC9346] p-4 sm:p-6">
+      <Card className="mx-auto max-w-3xl bg-white/75 border border-[#d5dce5] p-4 sm:p-6">
         <div className="mb-5 sm:mb-6">
           <div className="mb-2 flex items-center justify-between gap-4 text-xs font-semibold sm:mb-3 sm:text-sm">
             <span className="text-[#008AF4]">Pergunta {currentQuestionIndex + 1} de {questions.length}</span>
             <span className="text-gray-500">{progress}%</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-gray-200">
-            <div className="h-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] transition-all" style={{ width: `${progress}%` }} />
+            <div className="h-full bg-gradient-to-r from-[#17C7B2] to-[#1464E9] transition-all" style={{ width: `${progress}%` }} />
           </div>
         </div>
 
@@ -1167,7 +1167,7 @@ function TrailPage({
           const Icon = course.icon;
           const progress = progressFor(course);
           return (
-            <Card key={course.id} className="bg-white/75 border border-[#FC9346] p-4 md:p-6">
+            <Card key={course.id} className="bg-white/75 border border-[#d5dce5] p-4 md:p-6">
               <div className="flex h-full flex-col justify-between gap-4 md:h-auto md:flex-row md:flex-wrap md:items-center md:gap-5">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#008AF4] to-[#173DB7] text-white md:h-12 md:w-12">
@@ -1185,7 +1185,7 @@ function TrailPage({
                     <span className="text-[#008AF4]">{progress}%</span>
                   </div>
                   <div className="mb-3 h-2 overflow-hidden rounded-full bg-gray-200 md:mb-4">
-                    <div className="h-full bg-gradient-to-r from-[#008AF4] to-[#173DB7]" style={{ width: `${progress}%` }} />
+                    <div className="h-full bg-gradient-to-r from-[#17C7B2] to-[#1464E9]" style={{ width: `${progress}%` }} />
                   </div>
                   <Button type="button" onClick={() => onStart(course.id)} className="w-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] px-2 text-xs text-white md:text-sm">
                     <span className="md:hidden">{progress > 0 ? 'Continuar' : 'Iniciar'}</span>
@@ -1228,7 +1228,7 @@ function ManagerPage({
         ].map((item) => {
           const Icon = item.icon;
           return (
-            <Card key={item.label} className="bg-white/75 border border-[#FC9346] p-4 md:p-6">
+            <Card key={item.label} className="bg-white/75 border border-[#d5dce5] p-4 md:p-6">
               <Icon size={24} className="text-[#008AF4] mb-3 md:mb-4 md:h-7 md:w-7" />
               <p className="mb-2 text-xs text-gray-600 md:text-sm">{item.label}</p>
               <p className="text-2xl md:text-3xl font-bold text-gray-900">{item.value}</p>
@@ -1238,7 +1238,7 @@ function ManagerPage({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white/75 border border-[#FC9346] p-6">
+        <Card className="bg-white/75 border border-[#d5dce5] p-6">
           <h3 className="text-2xl font-bold text-gray-900 mb-6">Cursos mais relevantes</h3>
           <div className="space-y-5">
             {courses.map((course) => (
@@ -1248,14 +1248,14 @@ function ManagerPage({
                   <span className="text-[#008AF4]">{progressFor(course)}%</span>
                 </div>
                 <div className="h-3 rounded-full bg-gray-200 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[#008AF4] to-[#173DB7]" style={{ width: `${progressFor(course)}%` }} />
+                  <div className="h-full bg-gradient-to-r from-[#17C7B2] to-[#1464E9]" style={{ width: `${progressFor(course)}%` }} />
                 </div>
               </div>
             ))}
           </div>
         </Card>
 
-        <Card className="bg-white/75 border border-[#FC9346] p-6">
+        <Card className="bg-white/75 border border-[#d5dce5] p-6">
           <h3 className="text-2xl font-bold text-gray-900 mb-6">Competências em desenvolvimento</h3>
           <div className="flex flex-wrap gap-3">
             {Array.from(new Set(courses.flatMap((course) => courseCompetencies[course.id] ?? []))).map((competency) => (
@@ -1304,7 +1304,7 @@ function CourseGrid({
           const CourseIcon = course.icon;
           const progress = progressFor(course);
           return (
-            <Card key={course.id} className="bg-white/70 backdrop-blur-sm border border-[#FC9346] hover:border-[#E94E1B] hover:shadow-xl overflow-hidden group py-0 md:py-6">
+            <Card key={course.id} className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] hover:shadow-xl overflow-hidden group py-0 md:py-6">
               <button type="button" onClick={() => onStart(course.id)} className="w-full text-left">
                 <div className="bg-[#173DB7] p-3 text-white md:p-6">
                   <CourseIcon size={28} className="mb-2 text-white md:h-10 md:w-10" />
@@ -1319,7 +1319,7 @@ function CourseGrid({
                       <span className="text-xs font-bold text-[#008AF4]">{progress}%</span>
                     </div>
                     <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] transition-all duration-300" style={{ width: `${progress}%` }} />
+                      <div className="h-full bg-gradient-to-r from-[#17C7B2] to-[#1464E9] transition-all duration-300" style={{ width: `${progress}%` }} />
                     </div>
                   </div>
                   <span className="inline-flex w-full items-center justify-center rounded-md bg-gradient-to-r from-[#008AF4] to-[#173DB7] px-2 py-2 text-xs font-medium text-white transition-all group-hover:shadow-lg md:px-4 md:text-sm">
@@ -1351,7 +1351,7 @@ function SimplePage({
 }) {
   return (
     <div className="p-4 sm:p-8">
-      <Card className="bg-white/70 border border-[#d9efff] p-8 max-w-2xl">
+      <Card className="bg-white/70 border border-[#d5dce5] p-8 max-w-2xl">
         <Icon size={48} className="text-[#008AF4] mb-4" />
         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{title}</h2>
         <p className="text-gray-600 text-lg mb-8">{body}</p>
