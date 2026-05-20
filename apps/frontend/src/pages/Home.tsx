@@ -42,7 +42,7 @@ import {
   type ProgressState,
 } from '@/lib/learning';
 
-type Page = 'dashboard' | 'diagnostic' | 'trail' | 'courses' | 'lesson' | 'progress' | 'manager' | 'certificates' | 'profile' | 'settings' | 'help';
+type Page = 'dashboard' | 'diagnostic' | 'trail' | 'courses' | 'courseIntro' | 'lesson' | 'progress' | 'manager' | 'certificates' | 'profile' | 'settings' | 'help';
 
 function readStorage<T>(key: string, fallback: T, legacyKey?: string): T {
   try {
@@ -63,6 +63,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [selectedCourseId, setSelectedCourseId] = useState<number>(courses[0].id);
   const [currentModule, setCurrentModule] = useState(0);
+  const [courseIntroBackPage, setCourseIntroBackPage] = useState<Page>('courses');
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [answered, setAnswered] = useState(false);
   const [showCompletion, setShowCompletion] = useState(false);
@@ -143,6 +144,12 @@ export default function Home() {
     if (!isDesktop) {
       setSidebarOpen(false);
     }
+  };
+
+  const openCourseIntro = (courseId: number) => {
+    setSelectedCourseId(courseId);
+    setCourseIntroBackPage(currentPage);
+    navigate('courseIntro');
   };
 
   const startCourse = (courseId: number) => {
@@ -400,7 +407,7 @@ export default function Home() {
                             {primaryNextModule.time} minutos · {primaryCourse.level}
                           </p>
                         </div>
-                        <Button type="button" onClick={() => startCourse(primaryCourse.id)} className="shrink-0 bg-gradient-to-r from-[#008AF4] to-[#173DB7] px-3 text-xs text-white sm:px-4 sm:text-sm">
+                        <Button type="button" onClick={() => openCourseIntro(primaryCourse.id)} className="shrink-0 bg-gradient-to-r from-[#008AF4] to-[#173DB7] px-3 text-xs text-white sm:px-4 sm:text-sm">
                           <span className="sm:hidden">{primaryProgress > 0 ? 'Continuar' : 'Começar'}</span>
                           <span className="hidden sm:inline">{primaryProgress > 0 ? 'Continuar agora' : 'Começar agora'}</span>
                           <ChevronRight size={14} className="sm:h-4 sm:w-4" />
@@ -489,7 +496,7 @@ export default function Home() {
                   </div>
                   <div className="grid sm:grid-cols-3 gap-3">
                     {recommendedCourses.slice(0, 3).map((course, index) => (
-                      <button key={course.id} type="button" onClick={() => startCourse(course.id)} className="rounded-lg border border-[#bfe3ff] bg-[#f3fbff] p-4 text-left hover:border-[#008AF4] transition-colors">
+                      <button key={course.id} type="button" onClick={() => openCourseIntro(course.id)} className="rounded-lg border border-[#bfe3ff] bg-[#f3fbff] p-4 text-left hover:border-[#008AF4] transition-colors">
                         <p className="text-xs font-bold text-[#008AF4] mb-2">Etapa {index + 1}</p>
                         <p className="font-bold text-gray-900">{course.title}</p>
                         <p className="text-sm text-gray-600 mt-2">{courseProgress(course)}% concluído</p>
@@ -500,15 +507,26 @@ export default function Home() {
               </div>
 
               {continueCourses.length > 1 && (
-                <CourseGrid title="Outros cursos em andamento" courses={continueCourses.slice(1)} progressFor={courseProgress} onStart={startCourse} />
+                <CourseGrid title="Outros cursos em andamento" courses={continueCourses.slice(1)} progressFor={courseProgress} onStart={openCourseIntro} />
               )}
             </div>
           )}
 
           {currentPage === 'courses' && (
             <div className="p-4 sm:p-8">
-              <CourseGrid title="Todos os Cursos" courses={courses} progressFor={courseProgress} onStart={startCourse} largeTitle />
+              <CourseGrid title="Todos os Cursos" courses={courses} progressFor={courseProgress} onStart={openCourseIntro} largeTitle />
             </div>
+          )}
+
+          {currentPage === 'courseIntro' && (
+            <CourseIntroPage
+              course={selectedCourse}
+              progress={courseProgress(selectedCourse)}
+              completedModules={completedModules}
+              competencies={courseCompetencies[selectedCourse.id] ?? []}
+              onBack={() => navigate(courseIntroBackPage === 'courseIntro' || courseIntroBackPage === 'lesson' ? 'courses' : courseIntroBackPage)}
+              onStart={() => startCourse(selectedCourse.id)}
+            />
           )}
 
           {currentPage === 'diagnostic' && (
@@ -524,7 +542,7 @@ export default function Home() {
               diagnostic={diagnostic}
               courses={recommendedTrailCourses}
               progressFor={courseProgress}
-              onStart={startCourse}
+              onStart={openCourseIntro}
               onRetake={() => navigate('diagnostic')}
             />
           )}
@@ -714,7 +732,7 @@ export default function Home() {
                         <h4 className="line-clamp-2 text-sm font-bold leading-tight text-gray-900 md:line-clamp-none md:text-base">{course.title}</h4>
                         <div className="flex w-full flex-col items-start gap-2 md:w-auto md:flex-row md:items-center md:gap-3">
                           <span className="text-sm font-bold text-[#008AF4] md:text-base">{courseProgress(course)}%</span>
-                          <Button type="button" variant="outline" size="sm" onClick={() => startCourse(course.id)} className="w-full px-2 text-xs md:w-auto md:text-sm">
+                          <Button type="button" variant="outline" size="sm" onClick={() => openCourseIntro(course.id)} className="w-full px-2 text-xs md:w-auto md:text-sm">
                             {courseProgress(course) === 0 ? 'Começar' : 'Continuar'}
                           </Button>
                         </div>
@@ -956,6 +974,136 @@ function DashboardDiagnostic({ onStart }: { onStart: () => void }) {
         </Button>
       </div>
     </Card>
+  );
+}
+
+function CourseIntroPage({
+  course,
+  progress,
+  completedModules,
+  competencies,
+  onBack,
+  onStart,
+}: {
+  course: Course;
+  progress: number;
+  completedModules: number[];
+  competencies: string[];
+  onBack: () => void;
+  onStart: () => void;
+}) {
+  const Icon = course.icon;
+  const totalMinutes = course.modules.reduce((sum, module) => sum + module.time, 0);
+  const nextModuleIndex = Math.min(completedModules.length, course.modules.length - 1);
+  const nextModule = course.modules[nextModuleIndex];
+  const completed = progress === 100;
+
+  return (
+    <div className="p-4 sm:p-8">
+      <button type="button" onClick={onBack} className="mb-5 flex items-center gap-2 font-medium text-[#008AF4] transition-colors hover:text-[#173DB7]">
+        ← Voltar
+      </button>
+
+      <div className="grid gap-5 lg:grid-cols-[1.5fr_0.9fr]">
+        <Card className="overflow-hidden border border-[#d5dce5] bg-white/80 py-0">
+          <div className="bg-[#173DB7] p-5 text-white sm:p-8">
+            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-lg bg-white/15 sm:h-16 sm:w-16">
+              <Icon size={32} />
+            </div>
+            <p className="text-sm font-semibold text-[#9bd4ff]">{course.level}</p>
+            <h2 className="mt-2 text-3xl font-bold leading-tight sm:text-5xl">{course.title}</h2>
+            <p className="mt-4 max-w-3xl text-base leading-relaxed text-[#d9efff] sm:text-lg">{course.description}</p>
+          </div>
+
+          <div className="p-5 sm:p-8">
+            <div className="mb-6 grid grid-cols-3 overflow-hidden rounded-lg border border-[#d5dce5] bg-white">
+              <div className="border-r border-[#d5dce5] p-3 sm:p-4">
+                <Clock size={18} className="mb-2 text-[#008AF4]" />
+                <p className="text-xl font-bold text-gray-900">{totalMinutes}m</p>
+                <p className="text-xs font-medium text-gray-600">Carga total</p>
+              </div>
+              <div className="border-r border-[#d5dce5] p-3 sm:p-4">
+                <BookOpen size={18} className="mb-2 text-[#008AF4]" />
+                <p className="text-xl font-bold text-gray-900">{course.modules.length}</p>
+                <p className="text-xs font-medium text-gray-600">Módulos</p>
+              </div>
+              <div className="p-3 sm:p-4">
+                <BarChart3 size={18} className="mb-2 text-[#008AF4]" />
+                <p className="text-xl font-bold text-gray-900">{progress}%</p>
+                <p className="text-xs font-medium text-gray-600">Progresso</p>
+              </div>
+            </div>
+
+            <div className="mb-7">
+              <div className="mb-2 flex justify-between text-sm font-semibold">
+                <span className="text-gray-700">Andamento do curso</span>
+                <span className="text-[#008AF4]">{completedModules.length}/{course.modules.length}</span>
+              </div>
+              <div className="h-3 overflow-hidden rounded-full bg-gray-200">
+                <div className="h-full bg-gradient-to-r from-[#17C7B2] to-[#1464E9] transition-all duration-300" style={{ width: `${progress}%` }} />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="mb-4 text-xl font-bold text-gray-900">Conteúdo do curso</h3>
+              <div className="space-y-3">
+                {course.modules.map((module, index) => {
+                  const moduleDone = completedModules.includes(module.id);
+                  const isNext = !completed && index === nextModuleIndex;
+                  return (
+                    <div key={module.id} className={`rounded-lg border p-4 ${isNext ? 'border-[#9bd4ff] bg-[#f3fbff]' : 'border-[#d5dce5] bg-white/80'}`}>
+                      <div className="flex items-start gap-3">
+                        <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${moduleDone ? 'bg-[#17C7B2] text-white' : isNext ? 'bg-[#008AF4] text-white' : 'bg-gray-100 text-gray-600'}`}>
+                          {moduleDone ? <Check size={15} /> : index + 1}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-bold text-gray-900">{module.title}</p>
+                            {isNext && <span className="rounded-full bg-[#eef8ff] px-2 py-0.5 text-xs font-bold text-[#008AF4]">Próximo</span>}
+                          </div>
+                          <p className="mt-1 text-sm text-gray-600">{module.time} minutos • {module.highlights.slice(0, 2).join(' • ')}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <div className="space-y-5">
+          <Card className="border border-[#d5dce5] bg-white/80 p-5 sm:p-6">
+            <p className="text-sm font-bold uppercase text-[#008AF4]">{completed ? 'Curso concluído' : progress > 0 ? 'Continue por aqui' : 'Comece por aqui'}</p>
+            <h3 className="mt-2 text-2xl font-bold text-gray-900">{completed ? 'Certificado liberado' : nextModule.title}</h3>
+            <p className="mt-3 text-sm leading-relaxed text-gray-600">
+              {completed
+                ? 'Você concluiu todos os módulos deste curso. Pode revisar o conteúdo quando quiser.'
+                : `Próximo módulo de ${nextModule.time} minutos para avançar na trilha.`}
+            </p>
+            <Button type="button" onClick={onStart} className="mt-5 w-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] text-white">
+              {completed ? 'Revisar curso' : progress > 0 ? 'Continuar curso' : 'Iniciar curso'}
+              <ChevronRight size={16} />
+            </Button>
+          </Card>
+
+          <Card className="border border-[#d5dce5] bg-white/80 p-5 sm:p-6">
+            <h3 className="mb-4 text-xl font-bold text-gray-900">Competências</h3>
+            <div className="flex flex-wrap gap-2">
+              {competencies.map((competency) => (
+                <span key={competency} className="rounded-full border border-[#bfe3ff] bg-[#f3fbff] px-3 py-1.5 text-sm font-semibold text-[#173DB7]">
+                  {competency}
+                </span>
+              ))}
+            </div>
+          </Card>
+
+          <MascotTip title="Dica da Nina" compact className="max-w-none">
+            Veja a sequência antes de começar e retome pelo próximo módulo quando voltar.
+          </MascotTip>
+        </div>
+      </div>
+    </div>
   );
 }
 
