@@ -11,21 +11,20 @@ Antes de comecar, instale:
 
 Se nao tiver o pnpm instalado:
 
-```bash
+```
 npm install -g pnpm
 ```
 
 ## Como rodar
-
 Instale as dependencias:
 
-```bash
+```
 pnpm install
 ```
 
 Inicie o ambiente de desenvolvimento:
 
-```bash
+```
 pnpm run dev
 ```
 

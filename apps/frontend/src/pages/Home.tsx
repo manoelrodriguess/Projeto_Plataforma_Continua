@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -43,6 +44,18 @@ import {
 } from '@/lib/learning';
 
 type Page = 'dashboard' | 'diagnostic' | 'trail' | 'courses' | 'courseIntro' | 'lesson' | 'progress' | 'manager' | 'certificates' | 'profile' | 'settings' | 'help';
+
+const cardSurface = 'border border-[#d5dce5] shadow-[0_8px_24px_rgba(15,23,42,0.06)]';
+const interactiveCard = `${cardSurface} transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(15,23,42,0.10)]`;
+const pageMotion = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] as const },
+};
+
+function LoadingDot() {
+  return <span className="h-2 w-2 animate-pulse rounded-full bg-current" />;
+}
 
 function readStorage<T>(key: string, fallback: T, legacyKey?: string): T {
   try {
@@ -237,6 +250,7 @@ export default function Home() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [answered, setAnswered] = useState(false);
   const [showCompletion, setShowCompletion] = useState(false);
+  const [downloadingCourseId, setDownloadingCourseId] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -380,14 +394,21 @@ export default function Home() {
   };
 
   const downloadCertificate = async (course: Course) => {
+    if (downloadingCourseId !== null) return;
+    setDownloadingCourseId(course.id);
     const competencies = courseCompetencies[course.id] ?? [];
-    const blob = await createCertificatePdf(course, competencies);
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `certificado-${slugify(course.title)}.pdf`;
-    link.click();
-    URL.revokeObjectURL(url);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 450));
+      const blob = await createCertificatePdf(course, competencies);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `certificado-${slugify(course.title)}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDownloadingCourseId(null);
+    }
   };
 
   const navItems: { id: Page; label: string; icon: LucideIcon }[] = [
@@ -449,7 +470,7 @@ export default function Home() {
                 <button type="button" onClick={() => navigate('settings')} className="w-full text-left px-4 py-3 hover:bg-[#eef8ff] flex items-center gap-2 text-gray-700 transition-colors">
                   <Settings size={18} /> Configurações
                 </button>
-                <button type="button" onClick={resetProgress} className="w-full text-left px-4 py-3 hover:bg-[#fff0e6] flex items-center gap-2 text-[#E94E1B] transition-colors">
+                <button type="button" onClick={resetProgress} className="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center gap-2 text-red-600 transition-colors">
                   <LogOut size={18} /> Restaurar demonstração
                 </button>
               </div>
@@ -596,7 +617,7 @@ export default function Home() {
                 </div>
               </Card>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mb-8 md:mb-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 mb-8 md:mb-12">
                 <DashboardDiagnostic
                   onStart={() => navigate('diagnostic')}
                 />
@@ -607,7 +628,7 @@ export default function Home() {
 
 
 
-                <Card className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] hover:shadow-xl p-4 md:p-6">
+                <Card className={`bg-white/70 backdrop-blur-sm ${interactiveCard} p-4 md:p-6`}>
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#008AF4] to-[#173DB7] rounded-lg flex items-center justify-center mb-3 md:mb-4 text-white">
                     <Rocket size={22} className="md:h-6 md:w-6" />
                   </div>
@@ -621,7 +642,7 @@ export default function Home() {
                   </div>
                 </Card>
 
-                <Card className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] hover:shadow-xl p-4 md:p-6">
+                <Card className={`bg-white/70 backdrop-blur-sm ${interactiveCard} p-4 md:p-6`}>
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#008AF4] to-[#173DB7] rounded-lg flex items-center justify-center mb-3 md:mb-4 text-white">
                     <BarChart3 size={22} className="md:h-6 md:w-6" />
                   </div>
@@ -712,7 +733,7 @@ export default function Home() {
                     <h2 className="text-2xl font-bold text-gray-900 mb-3">Módulo {currentModule + 1}: {currentLesson.title}</h2>
                     <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4 pb-4 border-b border-[#bfe3ff]">
                       <span className="flex items-center gap-2"><Clock className="text-[#008AF4]" size={16} /> {currentLesson.time} minutos</span>
-                      <span className="flex items-center gap-2"><BarChart3 className="text-[#FC9346]" size={16} /> Nível: {selectedCourse.level}</span>
+                      <span className="flex items-center gap-2"><BarChart3 className="text-[#1464E9]" size={16} /> Nível: {selectedCourse.level}</span>
                       <span className="flex items-center gap-2"><Check className="text-[#008AF4]" size={16} /> Com checkpoint</span>
                     </div>
 
@@ -727,7 +748,7 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div className="relative overflow-visible bg-gradient-to-br from-[#eef8ff] to-[#fff0e6] border-2 border-[#bfe3ff] rounded-lg p-4 mt-4">
+                    <div className="relative overflow-visible bg-gradient-to-br from-[#eef8ff] to-[#eef8ff] border-2 border-[#bfe3ff] rounded-lg p-4 mt-4">
                       <h3 className="text-base font-bold text-[#173DB7] mb-3 flex items-center gap-2">
                         <Check size={20} className="text-[#008AF4]" /> Checkpoint de Conhecimento
                       </h3>
@@ -747,7 +768,7 @@ export default function Home() {
                                   ? answered
                                     ? isCorrect
                                       ? 'border-[#008AF4] bg-[#eef8ff] text-[#173DB7]'
-                                      : 'border-[#E94E1B] bg-[#fff0e6] text-[#E94E1B]'
+                                      : 'border-red-500 bg-red-50 text-red-900'
                                     : 'border-[#008AF4] bg-[#eef8ff] text-[#173DB7]'
                                   : answered && isCorrect
                                     ? 'border-[#008AF4] bg-[#eef8ff] text-[#173DB7]'
@@ -760,7 +781,7 @@ export default function Home() {
                                   ? answered
                                     ? isCorrect
                                       ? 'border-[#008AF4] bg-[#008AF4]'
-                                      : 'border-[#E94E1B] bg-[#E94E1B]'
+                                      : 'border-red-500 bg-red-500'
                                     : 'border-[#008AF4] bg-[#008AF4]'
                                   : answered && isCorrect
                                     ? 'border-[#008AF4] bg-[#008AF4]'
@@ -776,7 +797,7 @@ export default function Home() {
 
                       {answered && (
                         <div className={`p-3 rounded-lg mb-4 flex gap-3 text-sm ${
-                          selectedAnswer === currentLesson.correct ? 'bg-[#eef8ff] border border-[#9bd4ff] text-[#173DB7]' : 'bg-[#ffe2cf] border border-[#FC9346] text-[#E94E1B]'
+                          selectedAnswer === currentLesson.correct ? 'bg-[#eef8ff] border border-[#9bd4ff] text-[#173DB7]' : 'bg-red-100 border border-red-300 text-red-900'
                         }`}>
                           <div className="flex-shrink-0 mt-1">{selectedAnswer === currentLesson.correct ? <Check size={20} /> : <X size={20} />}</div>
                           <div>
@@ -853,7 +874,7 @@ export default function Home() {
           {currentPage === 'progress' && (
             <div className="p-4 sm:p-8">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-12">Seu Progresso</h2>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-6 mb-8 md:mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 md:gap-6 mb-8 md:mb-12">
                 {[
                   { label: 'Horas Totais', value: `${stats.studyHours}h`, icon: Clock },
                   { label: 'Módulos Completos', value: String(stats.completedModules), icon: Check },
@@ -878,7 +899,7 @@ export default function Home() {
 
               <Card className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] p-4 md:p-8">
                 <h3 className="mb-4 text-xl font-bold text-gray-900 md:mb-6 md:text-2xl">Detalhamento por Curso</h3>
-                <div className="grid grid-cols-2 gap-3 md:block md:space-y-6">
+                <div className="grid grid-cols-1 gap-3 md:block md:space-y-6">
                   {courses.map((course) => (
                     <div key={course.id} className="rounded-lg border border-[#bfe3ff] bg-white/80 p-3 md:rounded-none md:border-0 md:border-b md:bg-transparent md:p-0 md:pb-6 md:last:border-b-0">
                       <div className="mb-3 flex flex-col items-start gap-3 md:flex-row md:flex-wrap md:items-center md:justify-between">
@@ -903,37 +924,37 @@ export default function Home() {
           {currentPage === 'certificates' && (
             <div className="p-4 sm:p-8">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8 md:mb-12">Seus Certificados</h2>
-              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
                 {completedCourseList.length === 0 && (
-                  <Card className="col-span-2 bg-white/70 border border-[#d5dce5] p-6 md:p-8 text-center lg:col-span-3">
-                    <Trophy size={56} className="text-[#FC9346] mx-auto mb-4" />
+                  <Card className="bg-white/70 border border-[#d5dce5] p-6 text-center md:p-8 sm:col-span-2 lg:col-span-3">
+                    <Trophy size={56} className="text-[#1464E9] mx-auto mb-4" />
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">Nenhum certificado liberado ainda</h3>
                     <p className="text-gray-600 mb-6">Conclua todos os módulos de um curso para baixar seu certificado.</p>
                     <Button type="button" onClick={() => navigate('courses')} className="bg-gradient-to-r from-[#008AF4] to-[#173DB7] text-white">Ver Cursos</Button>
                   </Card>
                 )}
                 {completedCourseList.map((course) => (
-                    <Card key={course.id} className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] overflow-hidden">
-                      <div className="bg-[#FC9346] p-4 text-center md:p-8">
-                        <Trophy className="mx-auto mb-2 h-10 w-10 text-[#173DB7] md:mb-3 md:h-[60px] md:w-[60px]" />
-                        <h4 className="line-clamp-2 text-sm font-bold leading-tight text-[#173DB7] md:line-clamp-none md:text-lg">{course.title}</h4>
-                      </div>
+                  <motion.div key={course.id} {...pageMotion}>
+                    <Card className={`bg-white/75 backdrop-blur-sm ${interactiveCard} overflow-hidden py-0`}>
+                      <CertificatePreview course={course} competencies={courseCompetencies[course.id] ?? []} />
                       <div className="p-4 text-center md:p-6">
                         <p className="mb-1 text-xs text-gray-600 md:mb-2 md:text-base">Status</p>
                         <p className="mb-3 font-bold text-gray-900 md:mb-4">Concluído</p>
-                        <div className="mb-4 hidden flex-wrap justify-center gap-2 md:flex">
-                          {(courseCompetencies[course.id] ?? []).map((competency) => (
-                            <span key={competency} className="rounded-full bg-[#eef8ff] px-3 py-1 text-xs font-semibold text-[#008AF4]">
-                              {competency}
-                            </span>
-                          ))}
-                        </div>
                         <p className="text-xs text-gray-500 font-mono mb-3 md:mb-4">INN-{course.id}-100</p>
-                        <Button type="button" onClick={() => downloadCertificate(course)} className="w-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] px-2 text-xs text-white md:text-sm">
-                          <Download size={16} /> Baixar Certificado
+                        <Button type="button" onClick={() => downloadCertificate(course)} disabled={downloadingCourseId !== null} className="w-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] px-2 text-xs text-white md:text-sm">
+                          {downloadingCourseId === course.id ? (
+                            <>
+                              <LoadingDot /> Gerando PDF...
+                            </>
+                          ) : (
+                            <>
+                              <Download size={16} /> Baixar PDF
+                            </>
+                          )}
                         </Button>
                       </div>
                     </Card>
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -1009,15 +1030,26 @@ export default function Home() {
                 <p className="text-2xl font-bold text-[#008AF4]">{selectedCourse.modules.length}/{selectedCourse.modules.length}</p>
                 <p className="text-xs text-[#173DB7] font-medium">Módulos</p>
               </div>
-              <div className="bg-gradient-to-br from-[#fff0e6] to-[#ffe2cf] rounded-lg p-4 flex flex-col items-center">
-                <Clock size={24} className="text-[#E94E1B] mb-2" />
-                <p className="text-2xl font-bold text-[#E94E1B]">{selectedCourse.modules.reduce((sum, module) => sum + module.time, 0)}m</p>
-                <p className="text-xs text-[#E94E1B] font-medium">Tempo</p>
+              <div className="bg-gradient-to-br from-[#eef8ff] to-[#d9efff] rounded-lg p-4 flex flex-col items-center">
+                <Clock size={24} className="text-[#008AF4] mb-2" />
+                <p className="text-2xl font-bold text-[#008AF4]">{selectedCourse.modules.reduce((sum, module) => sum + module.time, 0)}m</p>
+                <p className="text-xs text-[#173DB7] font-medium">Tempo</p>
               </div>
             </div>
             <div className="grid gap-3">
-              <Button type="button" onClick={() => downloadCertificate(selectedCourse)} className="w-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] hover:from-[#173DB7] hover:to-[#173DB7] text-white font-bold py-3">
-                <Download size={16} /> Baixar Certificado
+              <div className="overflow-hidden rounded-lg border border-[#d5dce5]">
+                <CertificatePreview course={selectedCourse} competencies={courseCompetencies[selectedCourse.id] ?? []} compact />
+              </div>
+              <Button type="button" onClick={() => downloadCertificate(selectedCourse)} disabled={downloadingCourseId !== null} className="w-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] hover:from-[#173DB7] hover:to-[#173DB7] text-white font-bold py-3">
+                {downloadingCourseId === selectedCourse.id ? (
+                  <>
+                    <LoadingDot /> Gerando PDF...
+                  </>
+                ) : (
+                  <>
+                    <Download size={16} /> Baixar PDF
+                  </>
+                )}
               </Button>
               <Button type="button" variant="outline" onClick={() => { setShowCompletion(false); navigate('courses'); }} className="w-full">
                 Voltar aos Cursos
@@ -1039,9 +1071,38 @@ function ImpactRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function CertificatePreview({ course, competencies, compact = false }: { course: Course; competencies: string[]; compact?: boolean }) {
+  return (
+    <div className={`relative overflow-hidden bg-white ${compact ? 'p-3' : 'p-4'}`}>
+      <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#17C7B2] to-[#1464E9]" />
+      <div className={`rounded-md border border-[#d5dce5] bg-gradient-to-br from-white to-[#f3fbff] ${compact ? 'p-3' : 'p-4'}`}>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <p className="bg-gradient-to-r from-[#17C7B2] to-[#1464E9] bg-clip-text text-sm font-bold text-transparent">InnovaGov</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Certificado</p>
+          </div>
+          <Award size={compact ? 22 : 28} className="text-[#1464E9]" />
+        </div>
+        <div className="border-y border-[#d5dce5] py-3 text-center">
+          <p className="text-[10px] font-semibold uppercase text-gray-500">Concedido a</p>
+          <p className={`${compact ? 'text-base' : 'text-lg'} font-bold text-gray-900`}>{currentUser.name}</p>
+          <p className="mt-2 text-xs font-medium leading-snug text-gray-700">{course.title}</p>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {competencies.slice(0, compact ? 2 : 3).map((competency) => (
+            <span key={competency} className="rounded-full bg-[#eef8ff] px-2 py-0.5 text-[10px] font-semibold text-[#173DB7]">
+              {competency}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MascotAvatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const dimensions = {
-    sm: 'h-12 w-12',
+    sm: 'h-10 w-10',
     md: 'h-16 w-16',
     lg: 'h-24 w-24',
   };
@@ -1072,7 +1133,10 @@ function MascotTip({
   if (!visible) return null;
 
   return (
-    <div className={`pointer-events-auto relative flex items-center gap-4 rounded-lg border border-[#bfe3ff] bg-white/95 shadow-xl backdrop-blur ${compact ? 'p-3 pr-9' : 'p-4 pr-10'} ${className}`}>
+    <motion.div
+      {...pageMotion}
+      className={`pointer-events-auto relative flex items-center ${compact ? 'gap-3 rounded-lg p-3 pr-9 shadow-md' : 'gap-4 rounded-lg p-4 pr-10 shadow-xl'} border border-[#bfe3ff] bg-white/95 backdrop-blur ${className}`}
+    >
       <button
         type="button"
         onClick={() => setVisible(false)}
@@ -1086,13 +1150,13 @@ function MascotTip({
         <p className="text-sm font-bold text-gray-900">{title}</p>
         <p className="text-sm text-gray-600">{children}</p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 function DashboardDiagnostic({ onStart }: { onStart: () => void }) {
   return (
-    <Card className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] hover:shadow-xl p-4 md:p-6">
+    <Card className={`bg-white/70 backdrop-blur-sm ${interactiveCard} p-4 md:p-6`}>
       <div className="flex h-full flex-col justify-between gap-3 md:gap-4">
         <div>
           <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#008AF4] to-[#173DB7] rounded-lg flex items-center justify-center mb-3 md:mb-4 text-white">
@@ -1151,108 +1215,88 @@ function CourseIntroPage({
   const nextModule = course.modules[nextModuleIndex];
   const completed = progress === 100;
   const learningOutcomes = Array.from(new Set(course.modules.flatMap((module) => module.highlights))).slice(0, 4);
-  const targetAudience = course.level === 'Básico'
-    ? 'Servidores que querem começar com fundamentos práticos e linguagem direta.'
-    : course.level === 'Intermediário'
-      ? 'Servidores que já atuam em rotinas de gestão, projetos ou atendimento e querem melhorar entregas.'
-      : 'Servidores e lideranças que precisam conduzir temas estratégicos com mais segurança.';
-  const expectedResult = competencies.length
-    ? `Ao final, você terá base para aplicar ${competencies.slice(0, 2).join(' e ').toLowerCase()} na rotina do serviço público.`
-    : 'Ao final, você terá repertório prático para aplicar o conteúdo na rotina do serviço público.';
-  const prerequisites = course.level === 'Avançado'
-    ? 'Recomendado ter familiaridade com processos públicos, gestão de equipes ou iniciativas digitais.'
-    : 'Não exige conhecimento prévio. Basta acompanhar os módulos na sequência sugerida.';
 
   return (
-    <div className="p-4 sm:p-8">
-      <button type="button" onClick={onBack} className="mb-5 flex items-center gap-2 font-medium text-[#008AF4] transition-colors hover:text-[#173DB7]">
+    <div className="p-3 sm:p-5">
+      <button type="button" onClick={onBack} className="mb-3 flex items-center gap-2 text-sm font-medium text-[#008AF4] transition-colors hover:text-[#173DB7]">
         ← Voltar
       </button>
 
-      <div className="grid gap-5 lg:grid-cols-[1.5fr_0.9fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.55fr_0.85fr]">
         <Card className="overflow-hidden border border-[#d5dce5] bg-white/80 py-0">
-          <div className="bg-[#173DB7] p-5 text-white sm:p-8">
-            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-lg bg-white/15 sm:h-16 sm:w-16">
-              <Icon size={32} />
+          <div className="bg-[#173DB7] p-4 text-white sm:p-6">
+            <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-white/15 sm:h-12 sm:w-12">
+              <Icon size={26} />
             </div>
-            <p className="text-sm font-semibold text-[#9bd4ff]">{course.level}</p>
-            <h2 className="mt-2 text-3xl font-bold leading-tight sm:text-5xl">{course.title}</h2>
-            <p className="mt-4 max-w-3xl text-base leading-relaxed text-[#d9efff] sm:text-lg">{course.description}</p>
+            <p className="text-xs font-semibold text-[#9bd4ff] sm:text-sm">{course.level}</p>
+            <h2 className="mt-1 text-2xl font-bold leading-tight sm:text-4xl">{course.title}</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#d9efff] sm:text-base">{course.description}</p>
           </div>
 
-          <div className="p-5 sm:p-8">
-            <div className="mb-6 grid grid-cols-3 overflow-hidden rounded-lg border border-[#d5dce5] bg-white">
-              <div className="border-r border-[#d5dce5] p-3 sm:p-4">
-                <Clock size={18} className="mb-2 text-[#008AF4]" />
-                <p className="text-xl font-bold text-gray-900">{totalMinutes}m</p>
+          <div className="p-4 sm:p-6">
+            <div className="mb-4 grid grid-cols-3 overflow-hidden rounded-lg border border-[#d5dce5] bg-white">
+              <div className="border-r border-[#d5dce5] p-2.5 sm:p-3">
+                <Clock size={16} className="mb-1 text-[#008AF4]" />
+                <p className="text-lg font-bold text-gray-900">{totalMinutes}m</p>
                 <p className="text-xs font-medium text-gray-600">Carga total</p>
               </div>
-              <div className="border-r border-[#d5dce5] p-3 sm:p-4">
-                <BookOpen size={18} className="mb-2 text-[#008AF4]" />
-                <p className="text-xl font-bold text-gray-900">{course.modules.length}</p>
+              <div className="border-r border-[#d5dce5] p-2.5 sm:p-3">
+                <BookOpen size={16} className="mb-1 text-[#008AF4]" />
+                <p className="text-lg font-bold text-gray-900">{course.modules.length}</p>
                 <p className="text-xs font-medium text-gray-600">Módulos</p>
               </div>
-              <div className="p-3 sm:p-4">
-                <BarChart3 size={18} className="mb-2 text-[#008AF4]" />
-                <p className="text-xl font-bold text-gray-900">{progress}%</p>
+              <div className="p-2.5 sm:p-3">
+                <BarChart3 size={16} className="mb-1 text-[#008AF4]" />
+                <p className="text-lg font-bold text-gray-900">{progress}%</p>
                 <p className="text-xs font-medium text-gray-600">Progresso</p>
               </div>
             </div>
 
-            <div className="mb-7">
-              <div className="mb-2 flex justify-between text-sm font-semibold">
+            <div className="mb-4">
+              <div className="mb-1.5 flex justify-between text-sm font-semibold">
                 <span className="text-gray-700">Andamento do curso</span>
                 <span className="text-[#008AF4]">{completedModules.length}/{course.modules.length}</span>
               </div>
-              <div className="h-3 overflow-hidden rounded-full bg-gray-200">
+              <div className="h-2.5 overflow-hidden rounded-full bg-gray-200">
                 <div className="h-full bg-gradient-to-r from-[#17C7B2] to-[#1464E9] transition-all duration-300" style={{ width: `${progress}%` }} />
               </div>
             </div>
 
-            <div className="mb-7 grid gap-3 md:grid-cols-2">
-              <div className="rounded-lg border border-[#d5dce5] bg-white/80 p-4">
+            <div className="mb-4 rounded-lg border border-[#d5dce5] bg-white/85 p-3.5 sm:p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
                 <p className="text-sm font-bold uppercase text-[#008AF4]">O que você vai aprender</p>
-                <ul className="mt-3 space-y-2">
-                  {learningOutcomes.map((outcome) => (
-                    <li key={outcome} className="flex gap-2 text-sm text-gray-700">
-                      <Check size={16} className="mt-0.5 shrink-0 text-[#17C7B2]" />
-                      <span>{outcome}</span>
-                    </li>
-                  ))}
-                </ul>
+                <span className="hidden h-px flex-1 bg-[#d5dce5] sm:block" />
               </div>
-              <div className="rounded-lg border border-[#d5dce5] bg-white/80 p-4">
-                <p className="text-sm font-bold uppercase text-[#008AF4]">Para quem é</p>
-                <p className="mt-3 text-sm leading-relaxed text-gray-700">{targetAudience}</p>
-              </div>
-              <div className="rounded-lg border border-[#d5dce5] bg-white/80 p-4">
-                <p className="text-sm font-bold uppercase text-[#008AF4]">Resultado esperado</p>
-                <p className="mt-3 text-sm leading-relaxed text-gray-700">{expectedResult}</p>
-              </div>
-              <div className="rounded-lg border border-[#d5dce5] bg-white/80 p-4">
-                <p className="text-sm font-bold uppercase text-[#008AF4]">Pré-requisitos</p>
-                <p className="mt-3 text-sm leading-relaxed text-gray-700">{prerequisites}</p>
-              </div>
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {learningOutcomes.map((outcome) => (
+                  <li key={outcome} className="flex min-h-10 items-center gap-2 rounded-lg bg-[#f3fbff] px-3 py-2 text-sm font-medium text-gray-700">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-[#17C7B2] shadow-sm">
+                      <Check size={14} />
+                    </span>
+                    <span>{outcome}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
             <div>
-              <h3 className="mb-4 text-xl font-bold text-gray-900">Conteúdo do curso</h3>
-              <div className="space-y-3">
+              <h3 className="mb-3 text-lg font-bold text-gray-900">Conteúdo do curso</h3>
+              <div className="space-y-2">
                 {course.modules.map((module, index) => {
                   const moduleDone = completedModules.includes(module.id);
                   const isNext = !completed && index === nextModuleIndex;
                   return (
-                    <div key={module.id} className={`rounded-lg border p-4 ${isNext ? 'border-[#9bd4ff] bg-[#f3fbff]' : 'border-[#d5dce5] bg-white/80'}`}>
-                      <div className="flex items-start gap-3">
-                        <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${moduleDone ? 'bg-[#17C7B2] text-white' : isNext ? 'bg-[#008AF4] text-white' : 'bg-gray-100 text-gray-600'}`}>
-                          {moduleDone ? <Check size={15} /> : index + 1}
+                    <div key={module.id} className={`rounded-lg border p-3 ${isNext ? 'border-[#9bd4ff] bg-[#f3fbff]' : 'border-[#d5dce5] bg-white/80'}`}>
+                      <div className="flex items-start gap-2.5">
+                        <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${moduleDone ? 'bg-[#17C7B2] text-white' : isNext ? 'bg-[#008AF4] text-white' : 'bg-gray-100 text-gray-600'}`}>
+                          {moduleDone ? <Check size={14} /> : index + 1}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-bold text-gray-900">{module.title}</p>
+                            <p className="text-sm font-bold text-gray-900 sm:text-base">{module.title}</p>
                             {isNext && <span className="rounded-full bg-[#eef8ff] px-2 py-0.5 text-xs font-bold text-[#008AF4]">Próximo</span>}
                           </div>
-                          <p className="mt-1 text-sm text-gray-600">{module.time} minutos • {module.highlights.slice(0, 2).join(' • ')}</p>
+                          <p className="mt-0.5 text-xs text-gray-600 sm:text-sm">{module.time} minutos • {module.highlights.slice(0, 2).join(' • ')}</p>
                         </div>
                       </div>
                     </div>
@@ -1263,23 +1307,23 @@ function CourseIntroPage({
           </div>
         </Card>
 
-        <div className="space-y-5">
-          <Card className="border border-[#d5dce5] bg-white/80 p-5 sm:p-6">
-            <p className="text-sm font-bold uppercase text-[#008AF4]">{completed ? 'Curso concluído' : progress > 0 ? 'Continue por aqui' : 'Comece por aqui'}</p>
-            <h3 className="mt-2 text-2xl font-bold text-gray-900">{completed ? 'Certificado liberado' : nextModule.title}</h3>
-            <p className="mt-3 text-sm leading-relaxed text-gray-600">
+        <div className="space-y-4">
+          <Card className="border border-[#d5dce5] bg-white/80 p-4 sm:p-5">
+            <p className="text-xs font-bold uppercase text-[#008AF4] sm:text-sm">{completed ? 'Curso concluído' : progress > 0 ? 'Continue por aqui' : 'Comece por aqui'}</p>
+            <h3 className="mt-1.5 text-xl font-bold text-gray-900 sm:text-2xl">{completed ? 'Certificado liberado' : nextModule.title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-gray-600">
               {completed
                 ? 'Você concluiu todos os módulos deste curso. Pode revisar o conteúdo quando quiser.'
                 : `Próximo módulo de ${nextModule.time} minutos para avançar na trilha.`}
             </p>
-            <Button type="button" onClick={onStart} className="mt-5 w-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] text-white">
+            <Button type="button" onClick={onStart} className="mt-4 w-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] text-white">
               {completed ? 'Revisar curso' : progress > 0 ? 'Continuar curso' : 'Iniciar curso'}
               <ChevronRight size={16} />
             </Button>
           </Card>
 
-          <Card className="border border-[#d5dce5] bg-white/80 p-5 sm:p-6">
-            <h3 className="mb-4 text-xl font-bold text-gray-900">Competências</h3>
+          <Card className="border border-[#d5dce5] bg-white/80 p-4 sm:p-5">
+            <h3 className="mb-3 text-lg font-bold text-gray-900">Competências</h3>
             <div className="flex flex-wrap gap-2">
               {competencies.map((competency) => (
                 <span key={competency} className="rounded-full border border-[#bfe3ff] bg-[#f3fbff] px-3 py-1.5 text-sm font-semibold text-[#173DB7]">
@@ -1501,12 +1545,13 @@ function TrailPage({
         </MascotTip>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:block md:space-y-4">
+      <div className="grid grid-cols-1 gap-3 md:block md:space-y-4">
         {courses.map((course, index) => {
           const Icon = course.icon;
           const progress = progressFor(course);
           return (
-            <Card key={course.id} className="bg-white/75 border border-[#d5dce5] p-4 md:p-6">
+            <motion.div key={course.id} {...pageMotion}>
+            <Card className={`bg-white/75 ${interactiveCard} p-4 md:p-6`}>
               <div className="flex h-full flex-col justify-between gap-4 md:h-auto md:flex-row md:flex-wrap md:items-center md:gap-5">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#008AF4] to-[#173DB7] text-white md:h-12 md:w-12">
@@ -1533,6 +1578,7 @@ function TrailPage({
                 </div>
               </div>
             </Card>
+            </motion.div>
           );
         })}
       </div>
@@ -1558,7 +1604,7 @@ function ManagerPage({
         <p className="text-lg text-gray-600">Visão institucional para acompanhar engajamento, desempenho e impacto da capacitação.</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8">
         {[
           { label: 'Servidores em capacitação', value: '128', icon: Users },
           { label: 'Progresso médio', value: `${averageProgress}%`, icon: BarChart3 },
@@ -1603,10 +1649,10 @@ function ManagerPage({
               </span>
             ))}
           </div>
-          <div className="mt-8 grid grid-cols-2 gap-4">
-            <div className="rounded-lg bg-[#fff0e6] p-4">
-              <p className="text-sm text-[#E94E1B]">Impacto estimado</p>
-              <p className="text-2xl font-bold text-[#E94E1B]">{stats.estimatedHoursSaved}h economizadas</p>
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="rounded-lg bg-[#eef8ff] p-4">
+              <p className="text-sm text-[#173DB7]">Impacto estimado</p>
+              <p className="text-2xl font-bold text-[#008AF4]">{stats.estimatedHoursSaved}h economizadas</p>
             </div>
             <div className="rounded-lg bg-[#eef8ff] p-4">
               <p className="text-sm text-[#173DB7]">Módulos concluídos</p>
@@ -1635,15 +1681,16 @@ function CourseGrid({
   return (
     <div>
       <h3 className={`${largeTitle ? 'text-3xl sm:text-4xl mb-8 md:mb-12' : 'text-2xl mb-6 md:mb-8'} font-bold text-gray-900 flex items-center gap-3`}>
-        <span className="w-1 h-8 md:h-9 bg-gradient-to-b from-[#008AF4] to-[#FC9346] rounded-full" />
+        <span className="w-1 h-8 md:h-9 bg-gradient-to-b from-[#17C7B2] to-[#1464E9] rounded-full" />
         {title}
       </h3>
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">
         {courses.map((course) => {
           const CourseIcon = course.icon;
           const progress = progressFor(course);
           return (
-            <Card key={course.id} className="bg-white/70 backdrop-blur-sm border border-[#d5dce5] hover:shadow-xl overflow-hidden group py-0 md:py-6">
+            <motion.div key={course.id} {...pageMotion}>
+            <Card className={`bg-white/70 backdrop-blur-sm ${interactiveCard} overflow-hidden group py-0 md:py-6`}>
               <button type="button" onClick={() => onStart(course.id)} className="w-full text-left">
                 <div className="bg-[#173DB7] p-3 text-white md:p-6">
                   <CourseIcon size={28} className="mb-2 text-white md:h-10 md:w-10" />
@@ -1668,6 +1715,7 @@ function CourseGrid({
                 </div>
               </button>
             </Card>
+            </motion.div>
           );
         })}
       </div>
@@ -1701,5 +1749,3 @@ function SimplePage({
     </div>
   );
 }
-
-
