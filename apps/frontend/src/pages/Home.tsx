@@ -390,17 +390,20 @@ export default function Home() {
         <main className={`flex-1 overflow-auto transition-all duration-300 ${sidebarOpen && isDesktop ? 'lg:ml-72' : 'ml-0'}`}>
           {currentPage === 'dashboard' && (
             <div className="relative p-3 sm:p-5">
+              <MascotTip title="Nina recomenda" compact mobilePopup className="absolute right-4 top-3">
+                Seu próximo passo está no card abaixo.
+              </MascotTip>
               <div className="relative mb-6 sm:mb-10">
                 <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-900 sm:mb-2 sm:gap-3 sm:text-5xl">Bem-vindo de volta! <Hand className="h-7 w-7 text-[#008AF4] sm:h-10 sm:w-10" /></h2>
                 <p className="text-sm leading-relaxed text-gray-600 sm:text-xl">Retome sua capacitação pelo ponto mais importante agora.</p>
                 <div className="absolute right-5 top-1 z-20 hidden xl:block">
                   <MascotTip title="Nina recomenda" compact className="max-w-xs">
-                    O primeiro card mostra o melhor próximo passo para você não precisar procurar onde parou.
+                    O primeiro card mostra o próximo passo para você não precisar procurar onde parou.
                   </MascotTip>
                 </div>
               </div>
 
-              <Card className="mb-4 overflow-hidden border border-[#d5dce5] bg-white/85 py-0 shadow-sm sm:mb-8 sm:py-6">
+              <Card className="relative mb-4 overflow-hidden border border-[#d5dce5] bg-white/85 py-0 shadow-sm sm:mb-8 sm:py-6">
                 <div className="grid gap-0 lg:grid-cols-[1.4fr_0.9fr]">
                   <div className="p-4 sm:p-7">
                     <div className="mb-3 grid grid-cols-[1fr_auto] items-start gap-3 sm:mb-5 sm:flex sm:flex-wrap sm:justify-between sm:gap-4">
@@ -631,9 +634,12 @@ export default function Home() {
                 </div>
 
                 <div className="lg:col-span-1">
-                  <Card className="sticky top-24 border border-[#d5dce5] bg-white/85 p-3 shadow-sm backdrop-blur-sm sm:p-5">
+                  <Card className="relative sticky top-24 border border-[#d5dce5] bg-white/85 p-3 shadow-sm backdrop-blur-sm sm:p-5">
                     <MascotTip title="Dica da Nina" compact className="mb-4 hidden max-w-none sm:flex">
                       Leia os destaques e responda com calma. Se errar, eu mostro o caminho para tentar de novo.
+                    </MascotTip>
+                    <MascotTip title="Dica da Nina" compact mobilePopup className="absolute right-3 top-3">
+                      Leia os destaques e responda com calma.
                     </MascotTip>
                     <h4 className="mb-3 flex items-center gap-2 text-base font-bold text-gray-900 sm:mb-4 sm:text-lg"><BookOpen className="h-5 w-5 text-[#008AF4] sm:h-[22px] sm:w-[22px]" /> Módulos</h4>
                     <div className="space-y-1.5 sm:space-y-2">
@@ -970,7 +976,7 @@ function CourseIntroPage({
           </div>
         </Card>
 
-        <div className="space-y-4">
+        <div className="relative space-y-4">
           <Card className="border border-[#d5dce5] bg-white/80 p-4 sm:p-5">
             <p className="text-xs font-bold uppercase text-[#008AF4] sm:text-sm">{completed ? 'Curso concluído' : progress > 0 ? 'Continue por aqui' : 'Comece por aqui'}</p>
             <h3 className="mt-1.5 text-xl font-bold text-gray-900 sm:text-2xl">{completed ? 'Certificado liberado' : nextModule.title}</h3>
@@ -996,8 +1002,11 @@ function CourseIntroPage({
             </div>
           </Card>
 
-          <MascotTip title="Dica da Nina" compact className="max-w-none">
+          <MascotTip title="Dica da Nina" compact className="hidden max-w-none sm:flex">
             Veja a sequência antes de começar e retome pelo próximo módulo quando voltar.
+          </MascotTip>
+          <MascotTip title="Dica da Nina" compact mobilePopup className="absolute right-2 top-2">
+            Veja a sequência e comece pelo próximo módulo.
           </MascotTip>
         </div>
       </div>
@@ -1107,6 +1116,9 @@ function DiagnosticPage({
           Responda pensando na sua rotina atual. Você pode refazer o diagnóstico depois e atualizar as trilhas recomendadas.
         </MascotTip>
       </div>
+      <MascotTip title="Dica da Nina" compact mobilePopup className="absolute right-4 top-4">
+        Responda pensando na sua rotina atual.
+      </MascotTip>
 
       <Card className="mx-auto max-w-3xl bg-white/75 border border-[#d5dce5] p-4 sm:p-6">
         <div className="mb-5 sm:mb-6">
@@ -1207,6 +1219,9 @@ function TrailPage({
           A Nina usa suas respostas do diagnóstico para priorizar os temas mais adequados ao seu perfil. Caso queira mudar a recomendação, refaça o diagnóstico!
         </MascotTip>
       </div>
+      <MascotTip title="Por que essa ordem?" compact mobilePopup className="absolute right-4 top-4">
+        A ordem vem das suas respostas no diagnóstico.
+      </MascotTip>
 
       <div className="grid grid-cols-1 gap-3 md:block md:space-y-4">
         {courses.map((course, index) => {
