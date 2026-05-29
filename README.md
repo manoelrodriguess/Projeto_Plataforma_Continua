@@ -7,13 +7,7 @@ Aplicacao web moderna para gestao e inovacao governamental.
 Antes de comecar, instale:
 
 - **Node.js** versao 16 ou superior
-- **pnpm** como gerenciador de pacotes
-
-Se nao tiver o pnpm instalado:
-
-```
-npm install -g pnpm
-```
+- **npm**, que ja vem junto com o Node.js
 
 ## Como rodar
 Instale as dependencias:
@@ -78,11 +72,10 @@ InnovaGov/
 |       `-- index.ts
 |-- packages/
 |   `-- shared/               # Codigo compartilhado entre frontend e backend
-|-- patches/                  # Patches de dependencias pnpm
 |-- package.json              # Scripts e dependencias
+|-- package-lock.json         # Lockfile das dependencias npm
 |-- tsconfig.json             # Configuracao TypeScript
 |-- vite.config.ts            # Configuracao Vite
-`-- pnpm-lock.yaml
 ```
 
 ## Tecnologias
@@ -92,7 +85,7 @@ InnovaGov/
 - **Backend:** Node.js, Express
 - **Componentes UI:** Radix UI
 - **Build:** Vite e TypeScript Compiler
-- **Pacotes:** pnpm
+- **Pacotes:** npm
 
 ## Variaveis de ambiente
 
