@@ -19,7 +19,7 @@ npm install -g pnpm
 Instale as dependencias:
 
 ```
-pnpm install
+npm install --legacy-peer-deps
 ```
 
 Inicie o ambiente de desenvolvimento:
@@ -49,9 +49,9 @@ Por padrao, o Vite inicia em `http://localhost:3000` ou na proxima porta disponi
 Use a Vercel para publicar o frontend estatico:
 
 - Framework preset: `Vite`
-- Build command: `pnpm run build`
+- Build command: `npm run build`
 - Output directory: `dist/public`
-- Install command: `pnpm install --frozen-lockfile`
+- Install command: `npm install --legacy-peer-deps`
 - Root directory: raiz do repositorio
 
 O arquivo `vercel.json` ja deixa essas configuracoes no repositorio e tambem redireciona as rotas do app para `index.html`.
