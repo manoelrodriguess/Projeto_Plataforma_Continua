@@ -815,33 +815,33 @@ export default function Home() {
       </div>
 
       {showCompletion && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <Card className="bg-white max-w-md w-full border border-[#d5dce5] p-8 text-center animate-in zoom-in-50 duration-300">
-            <div className="mb-6 flex justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 backdrop-blur-sm sm:p-4">
+          <Card className="flex max-h-[calc(100dvh-1rem)] w-full max-w-md flex-col border border-[#d5dce5] bg-white p-3 text-center animate-in zoom-in-50 duration-300 sm:max-h-[calc(100dvh-2rem)] sm:p-6">
+            <div className="mb-2 flex justify-center sm:mb-4 [&>img]:h-16 [&>img]:w-16 sm:[&>img]:h-20 sm:[&>img]:w-20">
               <MascotAvatar size="lg" />
             </div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Parabéns!</h3>
-            <p className="text-gray-600 mb-8 text-lg">Você completou o curso {selectedCourse.title}. O certificado já está disponível.</p>
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-gradient-to-br from-[#eef8ff] to-[#d9efff] rounded-lg p-4">
-                <p className="text-2xl font-bold text-[#008AF4]">100%</p>
-                <p className="text-xs text-[#173DB7] font-medium">Progresso</p>
+            <h3 className="mb-1.5 text-xl font-bold text-gray-900 sm:mb-3 sm:text-3xl">Parabéns!</h3>
+            <p className="mb-3 text-sm leading-relaxed text-gray-600 sm:mb-5 sm:text-lg">Você completou o curso {selectedCourse.title}. O certificado já está disponível.</p>
+            <div className="mb-3 grid grid-cols-3 gap-2 sm:mb-5 sm:gap-4">
+              <div className="min-w-0 rounded-lg bg-gradient-to-br from-[#eef8ff] to-[#d9efff] p-2 sm:p-3">
+                <p className="text-lg font-bold text-[#008AF4] sm:text-2xl">100%</p>
+                <p className="text-[11px] font-medium text-[#173DB7] sm:text-xs">Progresso</p>
               </div>
-              <div className="bg-gradient-to-br from-[#eef8ff] to-[#d9efff] rounded-lg p-4">
-                <p className="text-2xl font-bold text-[#008AF4]">{selectedCourse.modules.length}/{selectedCourse.modules.length}</p>
-                <p className="text-xs text-[#173DB7] font-medium">Módulos</p>
+              <div className="min-w-0 rounded-lg bg-gradient-to-br from-[#eef8ff] to-[#d9efff] p-2 sm:p-3">
+                <p className="text-lg font-bold text-[#008AF4] sm:text-2xl">{selectedCourse.modules.length}/{selectedCourse.modules.length}</p>
+                <p className="text-[11px] font-medium text-[#173DB7] sm:text-xs">Módulos</p>
               </div>
-              <div className="bg-gradient-to-br from-[#eef8ff] to-[#d9efff] rounded-lg p-4 flex flex-col items-center">
-                <Clock size={24} className="text-[#008AF4] mb-2" />
-                <p className="text-2xl font-bold text-[#008AF4]">{selectedCourse.modules.reduce((sum, module) => sum + module.time, 0)}m</p>
-                <p className="text-xs text-[#173DB7] font-medium">Tempo</p>
+              <div className="flex min-w-0 flex-col items-center rounded-lg bg-gradient-to-br from-[#eef8ff] to-[#d9efff] p-2 sm:p-3">
+                <Clock size={18} className="mb-0.5 text-[#008AF4] sm:mb-1 sm:h-6 sm:w-6" />
+                <p className="text-lg font-bold text-[#008AF4] sm:text-2xl">{selectedCourse.modules.reduce((sum, module) => sum + module.time, 0)}m</p>
+                <p className="text-[11px] font-medium text-[#173DB7] sm:text-xs">Tempo</p>
               </div>
             </div>
-            <div className="grid gap-3">
+            <div className="grid min-h-0 gap-2 sm:gap-3">
               <div className="overflow-hidden rounded-lg border border-[#d5dce5]">
                 <CertificatePreview course={selectedCourse} competencies={courseCompetencies[selectedCourse.id] ?? []} compact />
               </div>
-              <Button type="button" onClick={() => downloadCertificate(selectedCourse)} disabled={downloadingCourseId !== null} className="w-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] hover:from-[#173DB7] hover:to-[#173DB7] text-white font-bold py-3">
+              <Button type="button" onClick={() => downloadCertificate(selectedCourse)} disabled={downloadingCourseId !== null} className="w-full bg-gradient-to-r from-[#008AF4] to-[#173DB7] py-2.5 font-bold text-white hover:from-[#173DB7] hover:to-[#173DB7] sm:py-3">
                 {downloadingCourseId === selectedCourse.id ? (
                   <>
                     <LoadingDot /> Gerando PDF...
@@ -852,7 +852,7 @@ export default function Home() {
                   </>
                 )}
               </Button>
-              <Button type="button" variant="outline" onClick={() => { setShowCompletion(false); navigate('courses'); }} className="w-full">
+              <Button type="button" variant="outline" onClick={() => { setShowCompletion(false); navigate('courses'); }} className="w-full py-2.5 sm:py-3">
                 Voltar aos Cursos
               </Button>
             </div>
